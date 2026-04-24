@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>2026 공무원 연봉 계산기 | 앱 버전</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f0f4ff;--bg2:#e8eeff;--card:#ffffff;
+  --border:#dde3f5;--accent:#3b82f6;--accent2:#6366f1;
+  --green:#10b981;--red:#ef4444;--gold:#f59e0b;--orange:#f97316;
+  --muted:#94a3b8;--text:#1e293b;--sub:#64748b;
+  --card-shadow:0 2px 12px rgba(59,130,246,0.08);
+  --card-shadow-hover:0 6px 24px rgba(59,130,246,0.15);
+}
+html{font-size:14px}
+body{
+  background:var(--bg);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%,rgba(99,102,241,0.12),transparent),
+    radial-gradient(ellipse 60% 40% at 80% 100%,rgba(59,130,246,0.08),transparent);
+  color:var(--text);font-family:'Noto Sans KR',sans-serif;
+  padding:0;min-height:100vh;padding-bottom:80px
+}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px}
+
+/* ── 헤더 ── */
+.header{text-align:center;padding:20px 0 18px}
+.badge{display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:20px;padding:5px 16px;font-size:11px;font-weight:800;
+  letter-spacing:2px;color:#fff;margin-bottom:10px;
+  box-shadow:0 4px 14px rgba(99,102,241,0.35)}
+.header h1{font-size:22px;font-weight:900;letter-spacing:-1px;line-height:1.3;color:var(--text)}
+.header p{font-size:11px;color:var(--muted);margin-top:5px}
+
+/* ── 카드 ── */
+.card{background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:16px;margin-bottom:12px;
+  box-shadow:var(--card-shadow)}
+.card-title{font-size:11px;font-weight:700;color:var(--muted);
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:12px}
+
+/* ── 직렬 선택 ── */
+.series-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.sbtn{padding:9px 4px;border-radius:12px;border:1.5px solid var(--border);cursor:pointer;
+  font-weight:700;font-size:12px;font-family:inherit;transition:all .2s;
+  background:#fff;color:var(--sub);line-height:1.3;
+  box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.sbtn.on{background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(59,130,246,0.35)}
+
+/* ── 폼 ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.lbl{font-size:11px;font-weight:700;color:var(--sub);letter-spacing:0.5px;display:block;margin-bottom:6px}
+.inp{width:100%;padding:10px 12px;border-radius:10px;
+  background:#f8faff;border:1.5px solid var(--border);
+  color:var(--text);font-size:14px;font-weight:600;font-family:inherit;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,0.04)}
+.inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,0.12)}
+select.inp{cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer;margin-top:3px}
+.range-row{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:1px}
+
+/* ── 기본급 박스 ── */
+.base-box{margin-top:12px;padding:11px 14px;border-radius:11px;
+  background:linear-gradient(135deg,rgba(59,130,246,0.07),rgba(99,102,241,0.05));
+  border:1.5px solid rgba(59,130,246,0.2);
+  display:flex;justify-content:space-between;align-items:center}
+.base-val{font-size:20px;font-weight:900;color:var(--accent)}
+
+/* ── 수당 ── */
+.allow-section-title{font-size:11px;font-weight:700;color:var(--gold);
+  margin:10px 0 6px;padding-bottom:4px;border-bottom:1px solid rgba(245,158,11,0.25)}
+.toggle-row{display:flex;align-items:center;gap:9px;
+  padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05);
+  -webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.toggle-row:active{background:rgba(59,130,246,0.05);border-radius:7px}
+.sw{width:38px;height:20px;border-radius:10px;cursor:pointer;
+  position:relative;transition:background .2s;flex-shrink:0}
+.sw .knob{position:absolute;top:2px;width:16px;height:16px;
+  border-radius:50%;background:#fff;transition:left .15s;
+  box-shadow:0 1px 4px rgba(0,0,0,0.2)}
+.allow-text{flex:1}
+.allow-name{font-size:13px;font-weight:600;color:var(--text)}
+.allow-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.extra-inp{padding:6px 0 2px 47px;display:flex;align-items:center;gap:6px}
+.inp-sm{padding:6px 9px;border-radius:7px;background:#f8faff;
+  border:1.5px solid var(--border);color:var(--text);font-size:12px;
+  font-weight:600;font-family:inherit}
+.inp-sm-w{flex:1}
+.unit{font-size:11px;color:var(--muted);flex-shrink:0}
+
+/* ── 결과 ── */
+.result-card{background:linear-gradient(145deg,#fff,#f0f4ff);
+  border:1.5px solid rgba(59,130,246,0.2);border-radius:18px;padding:18px;margin-bottom:12px;
+  box-shadow:0 8px 32px rgba(59,130,246,0.12)}
+.tabs{display:flex;gap:4px;margin-bottom:16px;background:#f0f4ff;
+  border-radius:12px;padding:4px;border:1px solid var(--border)}
+.tab{flex:1;padding:8px 0;border-radius:9px;border:none;
+  font-weight:700;font-size:11px;cursor:pointer;font-family:inherit;
+  background:transparent;color:var(--muted);transition:all .2s}
+.tab.on{background:#fff;color:var(--accent);box-shadow:0 2px 8px rgba(59,130,246,0.15)}
+.result-lbl{font-size:11px;color:var(--sub);margin-bottom:4px}
+.result-main{font-size:40px;font-weight:900;color:var(--accent);letter-spacing:-2px;line-height:1}
+.result-sub{font-size:11px;color:var(--muted);margin-top:5px}
+
+/* ── 상세행 ── */
+.sec-title{font-size:11px;color:var(--muted);margin:10px 0 4px;font-weight:700;letter-spacing:0.5px}
+.drow{display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06)}
+.drow .dl{font-size:12px;color:var(--sub)}
+.drow .dv{font-size:13px;font-weight:700}
+.summary-box{margin-top:10px;padding:10px 13px;border-radius:11px}
+.summary-box .sv{font-size:18px;font-weight:800;margin-top:2px}
+
+/* ── 병사 ── */
+.soldier-box{margin-top:10px;padding:10px 13px;border-radius:11px;
+  background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25)}
+
+/* ── 주의사항 ── */
+.notice{padding:11px 13px;border-radius:13px;background:#fff;
+  border:1px solid var(--border);font-size:10px;color:var(--sub);line-height:1.9;
+  box-shadow:var(--card-shadow)}
+
+/* ════════════════════════════════════════
+   앱 전용 기능 스타일
+════════════════════════════════════════ */
+
+/* ── 하단 네비게이션 ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-around;
+  padding:8px 0 max(8px, env(safe-area-inset-bottom));
+  max-width:560px;margin:0 auto;
+  box-shadow:0 -4px 20px rgba(59,130,246,0.08);
+}
+.nav-btn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:none;border:none;cursor:pointer;
+  color:var(--muted);font-size:9px;font-family:inherit;font-weight:700;
+  letter-spacing:0.5px;padding:4px 16px;transition:color .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.nav-btn.on{color:var(--accent)}
+.nav-btn svg{width:22px;height:22px}
+
+/* ── 페이지 ── */
+.page{display:none}
+.page.active{display:block}
+
+/* ── 내 정보 저장 배너 ── */
+.save-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-radius:13px;
+  background:linear-gradient(135deg,rgba(59,130,246,0.07),rgba(99,102,241,0.05));
+  border:1.5px solid rgba(59,130,246,0.18);
+  margin-bottom:12px;gap:10px;
+  box-shadow:0 2px 10px rgba(59,130,246,0.07);
+}
+.save-bar-text{font-size:12px;color:var(--sub)}
+.save-btn-row{display:flex;gap:6px}
+.btn-s{padding:6px 13px;border-radius:9px;border:none;cursor:pointer;
+  font-size:11px;font-weight:700;font-family:inherit;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(59,130,246,0.3)}
+.btn-outline{background:#fff;color:var(--sub);border:1.5px solid var(--border)}
+.btn-danger{background:rgba(239,68,68,0.08);color:var(--red);border:1.5px solid rgba(239,68,68,0.2)}
+
+/* ── D-Day 카드 ── */
+.dday-card{
+  border-radius:18px;padding:18px;margin-bottom:12px;
+  background:linear-gradient(145deg,#fff,#f0fdf8);
+  border:1.5px solid rgba(16,185,129,0.2);
+  box-shadow:0 4px 20px rgba(16,185,129,0.1)
+}
+.dday-big{font-size:36px;font-weight:900;color:var(--green);letter-spacing:-2px}
+.dday-label{font-size:11px;color:var(--muted);margin-top:4px}
+.dday-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.dday-item{
+  background:#fff;border:1px solid var(--border);
+  border-radius:12px;padding:10px 12px;
+  box-shadow:var(--card-shadow)
+}
+.dday-item-val{font-size:18px;font-weight:800;color:var(--accent)}
+.dday-item-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* ── 비교 탭 ── */
+.compare-section{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.compare-panel{
+  background:#fff;border:1.5px solid var(--border);
+  border-radius:16px;padding:14px;
+  box-shadow:var(--card-shadow)
+}
+.compare-panel.a{border-color:rgba(59,130,246,0.35)}
+.compare-panel.b{border-color:rgba(245,158,11,0.35)}
+.compare-badge{
+  display:inline-block;padding:2px 10px;border-radius:20px;
+  font-size:10px;font-weight:800;margin-bottom:10px
+}
+.badge-a{background:rgba(59,130,246,0.12);color:var(--accent)}
+.badge-b{background:rgba(245,158,11,0.12);color:var(--gold)}
+.compare-val{font-size:20px;font-weight:900;letter-spacing:-1px;margin:4px 0}
+.compare-sub{font-size:10px;color:var(--muted)}
+.compare-result{
+  background:#fff;border:1.5px solid var(--border);
+  border-radius:16px;padding:16px;margin-bottom:12px;
+  box-shadow:var(--card-shadow)
+}
+.compare-bar-wrap{margin:10px 0}
+.compare-bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px}
+.compare-bar-track{height:8px;background:#e8eeff;border-radius:4px;overflow:hidden}
+.compare-bar-fill{height:100%;border-radius:4px;transition:width .8s ease}
+
+/* ── 결과 공유 카드 ── */
+.share-card-wrap{
+  background:linear-gradient(145deg,#f0f4ff,#e8eeff);
+  border:1.5px solid rgba(59,130,246,0.2);border-radius:16px;
+  padding:20px;margin-bottom:12px;position:relative;overflow:hidden
+}
+.share-card-wrap::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle,rgba(59,130,246,0.12),transparent);
+  pointer-events:none
+}
+.share-title{font-size:11px;color:var(--muted);margin-bottom:14px;letter-spacing:1px;text-transform:uppercase}
+.share-main-val{font-size:38px;font-weight:900;color:var(--accent);letter-spacing:-2px}
+.share-row{display:flex;justify-content:space-between;
+  padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.06);
+  font-size:12px}
+.share-row:last-child{border-bottom:none}
+.share-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.share-action-btn{
+  padding:11px;border-radius:11px;border:none;cursor:pointer;
+  font-size:12px;font-weight:700;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all .2s
+}
+.btn-copy{background:rgba(59,130,246,0.1);color:var(--accent);border:1.5px solid rgba(59,130,246,0.2)}
+.btn-share{background:rgba(16,185,129,0.1);color:var(--green);border:1.5px solid rgba(16,185,129,0.2)}
+
+/* ── 히스토리 ── */
+.history-item{
+  background:#fff;border:1.5px solid var(--border);
+  border-radius:13px;padding:13px 15px;margin-bottom:8px;
+  display:flex;justify-content:space-between;align-items:center;
+  cursor:pointer;transition:border-color .2s, box-shadow .2s;
+  -webkit-tap-highlight-color:transparent;
+  box-shadow:var(--card-shadow)
+}
+.history-item:active{border-color:rgba(59,130,246,0.35);box-shadow:var(--card-shadow-hover)}
+.history-title{font-size:13px;font-weight:700;margin-bottom:3px;color:var(--text)}
+.history-sub{font-size:11px;color:var(--muted)}
+.history-val{font-size:16px;font-weight:800;color:var(--accent)}
+.history-del{
+  background:none;border:none;cursor:pointer;
+  color:var(--muted);font-size:16px;padding:4px;
+  -webkit-tap-highlight-color:transparent
+}
+
+/* ── 토스트 ── */
+.toast{
+  position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:rgba(30,41,59,0.95);border:1px solid rgba(59,130,246,0.2);
+  border-radius:30px;padding:10px 22px;font-size:13px;font-weight:600;
+  color:#fff;opacity:0;pointer-events:none;transition:all .3s;
+  white-space:nowrap;z-index:999;backdrop-filter:blur(10px);
+  box-shadow:0 8px 24px rgba(0,0,0,0.15)
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── 모바일 ── */
+@media(max-width:400px){
+  .series-grid{grid-template-columns:1fr 1fr}
+  .result-main{font-size:34px}
+  .compare-section{grid-template-columns:1fr 1fr}
+}
+
+/* ── 광고 슬롯 ── */
+.ad-slot{
+  width:100%;overflow:hidden;
+  display:flex;justify-content:center;align-items:center;
+  background:#f8faff;border:1px dashed var(--border);
+  border-radius:12px;margin-bottom:12px;
+  min-height:50px;position:relative;
+}
+.ad-slot-label{
+  position:absolute;top:3px;left:8px;
+  font-size:9px;color:var(--muted);letter-spacing:0.5px;
+}
+.ad-banner{
+  width:100%;overflow:hidden;
+  display:flex;justify-content:center;
+  margin-bottom:12px;
+}
+/* 하단 고정 광고 띠 */
+.ad-fixed-bottom{
+  position:fixed;bottom:60px;left:0;right:0;z-index:99;
+  display:flex;justify-content:center;
+  max-width:560px;margin:0 auto;
+  pointer-events:none;
+}
+</style>
+</head>
+<body>
+<div style="max-width:560px;margin:0 auto">
+
+<!-- ════ 계산기 페이지 ════ -->
+<div class="page active" id="page-calc">
+<div class="wrap">
+  <!-- 헤더 -->
+  <div class="header">
+    <div class="badge">🏛 2026 공무원 급여 계산기</div>
+    <h1>전 직렬 · 전 수당<br><span style="color:var(--accent)">완전 실수령액 계산</span></h1>
+    <p>공무원보수규정 [2026.3.1. 시행] 대통령령 제36147호 기준</p>
+  </div>
+
+  <!-- 내 정보 저장 배너 -->
+  <div class="save-bar" id="savebar">
+    <span class="save-bar-text" id="savebarText">💾 현재 설정을 저장하면 다음에 바로 불러올 수 있어요</span>
+    <div class="save-btn-row">
+      <button class="btn-s btn-primary" onclick="saveProfile()">저장</button>
+      <button class="btn-s btn-outline" id="loadBtn" onclick="loadProfile()" style="display:none">불러오기</button>
+    </div>
+  </div>
+
+  <!-- 비교 저장 버튼 -->
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button onclick="saveToCompare('A')"
+      style="flex:1;padding:10px;border-radius:12px;border:1.5px solid rgba(59,130,246,0.35);background:rgba(59,130,246,0.07);color:var(--accent);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+      비교 A로 저장
+    </button>
+    <button onclick="saveToCompare('B')"
+      style="flex:1;padding:10px;border-radius:12px;border:1.5px solid rgba(245,158,11,0.35);background:rgba(245,158,11,0.07);color:var(--gold);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+      비교 B로 저장
+    </button>
+  </div>
+
+  <!-- 직렬 선택 -->
+  <div class="card">
+    <div class="card-title">직렬 선택</div>
+    <div class="series-grid" id="seriesGrid"></div>
+  </div>
+
+  <!-- 직급·호봉 -->
+  <div class="card">
+    <div class="grid2">
+      <div>
+        <span class="lbl">직급 / 계급</span>
+        <select id="gradeSelect" class="inp" onchange="onGradeChange()"></select>
+      </div>
+      <div>
+        <span class="lbl">근속연수 (년)</span>
+        <input type="number" id="yearsInput" class="inp" value="0" min="0" max="40" oninput="calculate()">
+      </div>
+    </div>
+    <div id="stepSection">
+      <span class="lbl">호봉 — <span id="stepLbl" style="color:var(--accent);font-size:15px">1호봉</span></span>
+      <input type="range" id="stepRange" min="1" max="32" value="1" oninput="onStepChange()">
+      <div class="range-row"><span>1호봉</span><span id="maxStepLbl">32호봉</span></div>
+    </div>
+    <div class="base-box">
+      <span style="font-size:12px;color:var(--sub)">기본급 (봉급월액)</span>
+      <span class="base-val" id="baseValLbl">0원</span>
+    </div>
+  </div>
+
+  <!-- 수당 설정 -->
+  <div class="card" id="allowCard">
+    <div class="card-title">수당 설정</div>
+    <div id="allowList"></div>
+  </div>
+
+  <!-- 결과 -->
+  <div class="result-card" id="resultCard">
+    <div class="tabs" id="tabsEl"></div>
+    <div class="result-lbl" id="resultLbl">월 실수령액</div>
+    <div class="result-main" id="resultMain">-</div>
+    <div class="result-sub" id="resultSub"></div>
+    <div id="soldierBox" style="display:none" class="soldier-box">
+      <div style="font-size:11px;color:var(--gold)">💰 장병내일준비적금 포함</div>
+      <div id="soldierTotal" style="font-size:18px;font-weight:800;color:var(--gold);margin-top:3px"></div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px">병장기준 정부지원금 55만원 포함</div>
+    </div>
+    <div id="detailSection" style="margin-top:14px"></div>
+  </div>
+
+  <!-- ★ 광고 슬롯 1 : 결과 카드 하단 네이티브 광고 (320x100) -->
+  <div class="ad-banner">
+    <ins class="kakao_ad_area" style="display:none;"
+      data-ad-unit="DAN-XXXXXXXXXXXXXX"
+      data-ad-width="320"
+      data-ad-height="100"></ins>
+    <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+  </div>
+
+  <div class="notice">
+    ⚠️ <strong style="color:#9ca3af">계산 기준 안내</strong><br>
+    · 공무원보수규정 [별표3~13] 2026.3.1. 시행 기준<br>
+    · 공무원연금 기여율 9% / 건강보험 3.545% / 장기요양 12.81% / 고용보험 0.9%<br>
+    · 정근수당: 2025년 개정 반영 (1년미만 10% 신설)<br>
+    · 특수업무수당은 원칙상 1종만 지급 (단, 연구·민원수당은 기술정보수당과 중복 가능)
+  </div>
+
+  <!-- ★ 광고 슬롯 2 : 계산기 하단 배너 (320x50) -->
+  <div class="ad-banner" style="margin-top:8px">
+    <ins class="kakao_ad_area" style="display:none;"
+      data-ad-unit="DAN-YYYYYYYYYYYYYY"
+      data-ad-width="320"
+      data-ad-height="50"></ins>
+    <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+  </div>
+
+</div>
+</div><!-- /page-calc -->
+
+<!-- ════ 비교 페이지 ════ -->
+<div class="page" id="page-compare">
+<div class="wrap" style="padding-top:20px">
+  <div style="font-size:18px;font-weight:900;margin-bottom:4px">⚖️ 비교 계산기</div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:16px">공무원 vs 회사원 실수령액을 비교해요</div>
+
+  <!-- 비교 모드 토글 -->
+  <div style="display:flex;gap:6px;margin-bottom:14px;background:#f0f4ff;border-radius:12px;padding:4px;border:1px solid var(--border)">
+    <button id="cmpModeBtn1" onclick="setCmpMode('gov')"
+      style="flex:1;padding:9px;border-radius:9px;border:none;font-weight:700;font-size:12px;font-family:inherit;cursor:pointer;background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(59,130,246,0.2);transition:all .2s">
+      🏛 공무원 vs 공무원
+    </button>
+    <button id="cmpModeBtn2" onclick="setCmpMode('sal')"
+      style="flex:1;padding:9px;border-radius:9px;border:none;font-weight:700;font-size:12px;font-family:inherit;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s">
+      💼 공무원 vs 회사원
+    </button>
+  </div>
+
+  <!-- ── 공무원 vs 공무원 모드 ── -->
+  <div id="cmpGovMode">
+    <!-- 저장된 설정 표시 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <!-- A 패널 -->
+      <div class="compare-panel a" style="position:relative">
+        <div class="compare-badge badge-a">A</div>
+        <div id="cmpGovInfoA" style="font-size:11px;color:var(--sub);margin-bottom:4px;line-height:1.5;min-height:32px">
+          <span style="color:var(--muted);font-size:10px">계산기에서 'A로 저장' 버튼을 누르세요</span>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:2px">월 세전</div>
+        <div style="font-size:13px;font-weight:700;color:var(--sub)" id="cmpGrossA">-</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:6px;margin-bottom:2px">월 실수령액</div>
+        <div class="compare-val" id="cmpNetA" style="color:var(--accent);font-size:22px">-</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px" id="cmpNetAnnualA"></div>
+      </div>
+      <!-- B 패널 -->
+      <div class="compare-panel b" style="position:relative">
+        <div class="compare-badge badge-b">B</div>
+        <div id="cmpGovInfoB" style="font-size:11px;color:var(--sub);margin-bottom:4px;line-height:1.5;min-height:32px">
+          <span style="color:var(--muted);font-size:10px">계산기에서 'B로 저장' 버튼을 누르세요</span>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:2px">월 세전</div>
+        <div style="font-size:13px;font-weight:700;color:var(--sub)" id="cmpGrossB">-</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:6px;margin-bottom:2px">월 실수령액</div>
+        <div class="compare-val" id="cmpNetB" style="color:var(--gold);font-size:22px">-</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px" id="cmpNetAnnualB"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:10px;padding:8px 12px;background:#f8faff;border-radius:9px;border:1px solid var(--border)">
+      💡 계산기에서 직렬·수당을 모두 설정한 뒤 <strong>A 또는 B로 저장</strong>하면 수당 포함 비교가 가능해요
+    </div>
+  </div>
+
+  <!-- ── 공무원 vs 회사원 모드 ── -->
+  <div id="cmpSalMode" style="display:none">
+    <div class="compare-section">
+      <!-- 공무원 패널 (계산기에서 자동 연동) -->
+      <div class="compare-panel a">
+        <div class="compare-badge badge-a">공무원</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">계산기 설정 자동 연동</div>
+        <div id="salGovInfo" style="font-size:11px;color:var(--sub);font-weight:600;margin-bottom:8px;line-height:1.5">-</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:2px">월 세전</div>
+        <div style="font-size:13px;font-weight:700;color:var(--sub)" id="salGovGross">-</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:6px;margin-bottom:2px">월 실수령액</div>
+        <div class="compare-val" id="salGovNet" style="color:var(--accent);font-size:20px">-</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px" id="salGovAnnual"></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:1px" id="salGovAnnualGross"></div>
+      </div>
+      <!-- 회사원 패널 -->
+      <div class="compare-panel b">
+        <div class="compare-badge badge-b">회사원</div>
+        <!-- 입력방식 토글: 계산 / 직접입력 -->
+        <div style="display:flex;gap:3px;margin-bottom:10px;background:#f0f4ff;border-radius:8px;padding:3px;border:1px solid var(--border)">
+          <button id="salModeCalc" onclick="setSalMode('calc')"
+            style="flex:1;padding:4px 2px;border-radius:6px;border:none;font-weight:700;font-size:10px;font-family:inherit;cursor:pointer;background:var(--accent);color:#fff;transition:all .2s">계산</button>
+          <button id="salModeDirect" onclick="setSalMode('direct')"
+            style="flex:1;padding:4px 2px;border-radius:6px;border:none;font-weight:700;font-size:10px;font-family:inherit;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s">직접입력</button>
+        </div>
+
+        <!-- 계산 모드 -->
+        <div id="salCalcWrap">
+          <span class="lbl" style="margin-bottom:4px;display:block">직종</span>
+          <select id="salJobType" class="inp" style="font-size:11px;margin-bottom:7px;padding:7px 8px" onchange="calcSalCompare()">
+            <option value="general">일반 사무직</option>
+            <option value="it">IT · 개발직</option>
+            <option value="finance">금융 · 회계직</option>
+            <option value="sales">영업 · 마케팅</option>
+            <option value="mfg">제조 · 생산직</option>
+            <option value="med">의료 · 보건직</option>
+            <option value="edu">교육 · 연구직</option>
+          </select>
+          <span class="lbl" style="margin-bottom:4px;display:block">근속연수</span>
+          <input type="range" id="salYearsRange" min="1" max="30" value="5"
+            oninput="document.getElementById('salYearsLbl').textContent=this.value+'년차';calcSalCompare()"
+            style="width:100%;accent-color:var(--accent);margin-bottom:2px">
+          <div style="font-size:11px;color:var(--accent);font-weight:700;margin-bottom:6px" id="salYearsLbl">5년차</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px">추정 연봉</div>
+          <div style="font-size:14px;font-weight:800;color:var(--gold);margin-bottom:6px" id="salEstimated">-</div>
+        </div>
+
+        <!-- 직접입력 모드 -->
+        <div id="salDirectWrap" style="display:none">
+          <div style="display:flex;gap:4px;margin-bottom:8px">
+            <button id="salInputModeAnn" onclick="setSalInputMode('annual')"
+              style="flex:1;padding:5px 4px;border-radius:7px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-size:10px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s">연봉</button>
+            <button id="salInputModeMon" onclick="setSalInputMode('monthly')"
+              style="flex:1;padding:5px 4px;border-radius:7px;border:1.5px solid var(--border);background:#fff;color:var(--muted);font-size:10px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s">월급</button>
+          </div>
+          <div id="salAnnualWrap">
+            <span class="lbl">세전 연봉</span>
+            <input type="number" id="salAnnualInput" class="inp" placeholder="예: 40000000" value="40000000"
+              style="font-size:13px;margin-bottom:8px" oninput="calcSalCompare()">
+          </div>
+          <div id="salMonthlyWrap" style="display:none">
+            <span class="lbl">세전 월급</span>
+            <input type="number" id="salMonthlyInput" class="inp" placeholder="예: 3500000" value="3500000"
+              style="font-size:13px;margin-bottom:8px" oninput="calcSalCompare()">
+          </div>
+        </div>
+
+        <div style="font-size:10px;color:var(--muted);margin-top:6px;margin-bottom:2px">월 세전</div>
+        <div style="font-size:13px;font-weight:700;color:var(--sub)" id="salWorkerGross">-</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:6px;margin-bottom:2px">월 실수령액</div>
+        <div class="compare-val" id="salWorkerNet" style="color:var(--gold);font-size:20px">-</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px" id="salWorkerAnnual"></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:1px" id="salWorkerAnnualGross"></div>
+      </div>
+    </div>
+
+    <!-- 회사원 공제 상세 (결과표에 통합됨 - 참고용 숨김) -->
+    <div class="card" id="salWorkerDetail" style="display:none">
+      <div id="salWorkerRows"></div>
+    </div>
+  </div>
+
+  <!-- 비교 결과 (공통) -->
+  <div class="compare-result" id="cmpResult">
+    <div class="card-title">비교 결과</div>
+    <div id="cmpDiff" style="font-size:22px;font-weight:900;margin-bottom:12px;color:var(--text)">-</div>
+    <div class="compare-bar-wrap">
+      <div class="compare-bar-label">
+        <span id="cmpBarLblA" style="color:var(--accent)">A</span>
+        <span id="cmpBarLblB" style="color:var(--gold)">B</span>
+      </div>
+      <div class="compare-bar-track">
+        <div class="compare-bar-fill" id="cmpBarA" style="background:var(--accent);width:50%"></div>
+      </div>
+    </div>
+    <div id="cmpDetailList" style="margin-top:12px"></div>
+    <div id="cmpSalNote" style="display:none;font-size:10px;color:var(--muted);margin-top:10px;line-height:1.8">
+      ※ 공무원: 공무원연금 9% · 건강보험 3.545% · 고용보험 0.9% 기준<br>
+      ※ 회사원: 국민연금 4.5% · 건강보험 3.545% · 고용보험 0.9% · 소득세 간이세액표 기준<br>
+      ※ '-' 항목은 회사원에 해당 없는 공무원 고유 수당
+    </div>
+  </div>
+
+  <!-- 장기 관점 비교 -->
+  <div class="card" id="longTermCard" style="display:none">
+    <div class="card-title">📈 장기 관점 비교</div>
+    <div style="font-size:11px;color:var(--sub);margin-bottom:10px">퇴직금·연금 포함 실질 차이</div>
+    <div id="longTermRows"></div>
+  </div>
+
+  <!-- ★ 광고 슬롯 3 : 비교 페이지 하단 배너 (320x100) -->
+  <div class="ad-banner">
+    <ins class="kakao_ad_area" style="display:none;"
+      data-ad-unit="DAN-ZZZZZZZZZZZZZZ"
+      data-ad-width="320"
+      data-ad-height="100"></ins>
+    <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+  </div>
+
+</div>
+</div><!-- /page-compare -->
+
+<!-- ════ 공무원연금 페이지 ════ -->
+<div class="page" id="page-pension">
+<div class="wrap" style="padding-top:20px">
+  <div style="font-size:18px;font-weight:900;margin-bottom:4px">🏦 공무원연금 계산기</div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:16px">퇴직 후 예상 연금월액을 계산해요</div>
+
+  <!-- 기본 정보 입력 -->
+  <div class="card">
+    <div class="card-title">재직 정보</div>
+    <div class="grid2">
+      <div>
+        <span class="lbl">현재 나이</span>
+        <input type="number" id="penAge" class="inp" value="30" min="20" max="60" oninput="calcPension()">
+      </div>
+      <div>
+        <span class="lbl">임용 연도</span>
+        <input type="number" id="penStartYear" class="inp" value="2020" min="1990" max="2026" oninput="calcPension()">
+      </div>
+    </div>
+    <div class="grid2">
+      <div>
+        <span class="lbl">목표 퇴직 나이</span>
+        <input type="number" id="penRetireAge" class="inp" value="60" min="40" max="65" oninput="calcPension()">
+      </div>
+      <div>
+        <span class="lbl">예상 재직기간</span>
+        <div class="inp" style="background:#f0f4ff;color:var(--accent);font-weight:800" id="penYearsDisplay">30년</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 급여 정보 -->
+  <div class="card">
+    <div class="card-title">급여 정보</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;background:#f0f4ff;border-radius:10px;padding:3px;border:1px solid var(--border)">
+      <button id="penModeCalc" onclick="setPenMode('calc')"
+        style="flex:1;padding:7px;border-radius:8px;border:none;font-weight:700;font-size:11px;font-family:inherit;cursor:pointer;background:var(--accent);color:#fff;transition:all .2s">계산기 연동</button>
+      <button id="penModeDirect" onclick="setPenMode('direct')"
+        style="flex:1;padding:7px;border-radius:8px;border:none;font-weight:700;font-size:11px;font-family:inherit;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s">직접 입력</button>
+    </div>
+    <div id="penCalcInfo" style="padding:10px 12px;border-radius:10px;background:rgba(59,130,246,0.06);border:1.5px solid rgba(59,130,246,0.15);margin-bottom:4px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">계산기에서 불러온 기본급</div>
+      <div style="font-size:20px;font-weight:900;color:var(--accent)" id="penCurrentBase">-</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px" id="penCurrentLabel"></div>
+    </div>
+    <div id="penDirectWrap" style="display:none;margin-top:8px">
+      <span class="lbl">현재 기본급 (봉급월액)</span>
+      <input type="number" id="penBaseInput" class="inp" placeholder="예: 2500000" oninput="calcPension()">
+    </div>
+    <!-- 퇴직 시 기본급 상승률 -->
+    <div style="margin-top:12px">
+      <span class="lbl">연평균 급여 상승률 — <span id="penGrowthLbl" style="color:var(--accent)">2%</span></span>
+      <input type="range" id="penGrowthRange" min="0" max="5" step="0.5" value="2"
+        oninput="document.getElementById('penGrowthLbl').textContent=this.value+'%';calcPension()"
+        style="width:100%;accent-color:var(--accent)">
+      <div class="range-row"><span>0%</span><span>5%</span></div>
+    </div>
+  </div>
+
+  <!-- 결과 카드 -->
+  <div class="result-card" id="penResultCard">
+    <div class="result-lbl">퇴직 후 월 연금액 (예상)</div>
+    <div class="result-main" id="penMonthly" style="color:var(--accent)">-</div>
+    <div class="result-sub" id="penResultSub"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+      <div style="background:rgba(59,130,246,0.07);border:1.5px solid rgba(59,130,246,0.18);border-radius:12px;padding:12px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">연간 연금액</div>
+        <div style="font-size:17px;font-weight:800;color:var(--accent)" id="penAnnual">-</div>
+      </div>
+      <div style="background:rgba(16,185,129,0.07);border:1.5px solid rgba(16,185,129,0.18);border-radius:12px;padding:12px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">총 납입 기여금</div>
+        <div style="font-size:17px;font-weight:800;color:var(--green)" id="penTotalContrib">-</div>
+      </div>
+      <div style="background:rgba(245,158,11,0.07);border:1.5px solid rgba(245,158,11,0.18);border-radius:12px;padding:12px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">손익분기 수령기간</div>
+        <div style="font-size:17px;font-weight:800;color:var(--gold)" id="penBreakEven">-</div>
+      </div>
+      <div style="background:rgba(99,102,241,0.07);border:1.5px solid rgba(99,102,241,0.18);border-radius:12px;padding:12px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">연금 수령 시작 나이</div>
+        <div style="font-size:17px;font-weight:800;color:var(--accent2)" id="penStartAge">-</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 연도별 연금 상세 -->
+  <div class="card">
+    <div class="card-title">재직기간별 예상 월 연금액</div>
+    <div id="penYearList"></div>
+    <div style="font-size:10px;color:var(--muted);margin-top:10px;line-height:1.8">
+      ※ 공무원연금법 제43조 기준: 월연금액 = 평균기준소득월액 × 재직기간 × 1.7%<br>
+      ※ 2016년 이후 임용자 기준 (기여율 9%, 지급률 1.7%)<br>
+      ※ 실제 연금액은 물가상승률·법 개정 등으로 달라질 수 있어요
+    </div>
+  </div>
+
+  <!-- 국민연금과 비교 -->
+  <div class="card">
+    <div class="card-title">📊 국민연금과 비교</div>
+    <div id="penVsNational"></div>
+  </div>
+</div>
+</div><!-- /page-pension -->
+
+<!-- ════ 내 정보 페이지 ════ -->
+<div class="page" id="page-me">
+<div class="wrap" style="padding-top:20px">
+  <div style="font-size:18px;font-weight:900;margin-bottom:4px">👤 내 정보</div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:16px">저장된 프로필과 계산 기록</div>
+
+  <!-- 저장된 프로필 -->
+  <div class="card" id="profileSection">
+    <div class="card-title">저장된 프로필</div>
+    <div id="profileContent"></div>
+  </div>
+
+  <!-- 결과 공유 카드 -->
+  <div class="card">
+    <div class="card-title">내 급여 공유 카드</div>
+    <div class="share-card-wrap" id="shareCard">
+      <div class="share-title">2026 공무원 실수령액</div>
+      <div id="shareJobTitle" style="font-size:13px;color:var(--sub);margin-bottom:8px">-</div>
+      <div class="share-main-val" id="shareMainVal">-</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:14px" id="shareSubVal"></div>
+      <div id="shareRows"></div>
+    </div>
+    <div class="share-actions">
+      <button class="share-action-btn btn-copy" onclick="copyResult()">📋 텍스트 복사</button>
+      <button class="share-action-btn btn-share" onclick="shareResult()">📤 공유하기</button>
+    </div>
+  </div>
+
+  <!-- 계산 히스토리 -->
+  <div class="card">
+    <div class="card-title">최근 계산 기록</div>
+    <div id="historyList"></div>
+  </div>
+</div>
+</div><!-- /page-me -->
+
+</div><!-- /max-width wrap -->
+
+<!-- 하단 네비게이션 -->
+<div class="bottom-nav">
+  <button class="nav-btn on" id="nav-calc" onclick="switchPage('calc')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/>
+      <line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/>
+    </svg>
+    계산기
+  </button>
+  <button class="nav-btn" id="nav-compare" onclick="switchPage('compare')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="12" x2="21" y2="12"/><polyline points="8 7 3 12 8 17"/>
+      <polyline points="16 7 21 12 16 17"/>
+    </svg>
+    비교
+  </button>
+  <button class="nav-btn" id="nav-pension" onclick="switchPage('pension')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
+    </svg>
+    연금
+  </button>
+  <button class="nav-btn" id="nav-me" onclick="switchPage('me')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+    </svg>
+    내 정보
+  </button>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<!-- ════════════════════════════════════════
+  JAVASCRIPT
+════════════════════════════════════════ -->
+<script>
+// ════════════════ 봉급표 데이터 ════════════════
+const B3={1:[0,4656100,4819300,4986600,5157700,5333000,5510400,5690400,5871900,6056100,6241300,6426000,6617100,6809200,7001800,7170100,7319600,7452100,7570100,7675800,7770600,7857800,7935600,8001400,0,0,0,0,0,0,0,0,0],2:[0,4191600,4347100,4504700,4663700,4825100,4986500,5150200,5313600,5478200,5642500,5807700,5978600,6150500,6306200,6449600,6581000,6702000,6812700,6914900,7008100,7093400,7171600,7243100,7301700,7357600,0,0,0,0,0,0,0],3:[0,3781700,3921600,4065700,4210800,4358300,4507200,4658000,4809000,4961400,5113600,5266200,5424200,5571200,5707600,5833400,5950500,6059400,6160700,6254300,6342100,6423300,6498500,6567800,6632800,6685800,6736700,6783800,0,0,0,0,0],4:[0,3241200,3373500,3508000,3645700,3785200,3926200,4068300,4211100,4354500,4497700,4642100,4778100,4905100,5023800,5135500,5240900,5338700,5430100,5515500,5595300,5669800,5739700,5805400,5867300,5923800,5971800,6015900,6058300,0,0,0,0],5:[0,2896400,3013400,3135000,3261300,3390900,3523000,3657300,3793200,3929600,4066800,4195300,4319000,4436400,4545900,4649400,4746800,4838400,4924800,5006300,5082700,5154500,5222000,5285600,5345200,5401500,5454500,5498400,5540700,5579500,5617200,0,0],6:[0,2389500,2500700,2615200,2732400,2853100,2977100,3101500,3226200,3351300,3468700,3580000,3689600,3792700,3890000,3983600,4071300,4154900,4234100,4309100,4379600,4447600,4511500,4571300,4628500,4682800,4734100,4782800,4823700,4861900,4899800,4934800,4967800],7:[0,2317100,2367900,2423800,2485200,2567100,2682600,2798700,2915800,3027100,3133300,3233400,3331900,3425300,3514500,3599900,3680600,3758100,3832100,3902000,3968400,4031800,4091600,4149600,4204500,4256500,4306500,4348700,4388000,4426100,4462400,4496500,0],8:[0,2162100,2195700,2233800,2276600,2331700,2412900,2519600,2622400,2720300,2813000,2902700,2990300,3074500,3155100,3232400,3307100,3376800,3444300,3509300,3571100,3630200,3686900,3740800,3792900,3842300,3890300,3930200,3968700,4005100,4040300,4074600,0],9:[0,2133000,2147600,2168000,2194000,2226100,2264600,2309900,2367500,2456700,2542700,2624400,2705900,2783900,2859800,2932300,3002300,3070800,3134500,3197300,3257000,3313400,3367600,3419200,3468800,3516000,3558700,3595600,3631000,3665100,3698400,3731100,0]};
+const B4={1:[0,4905100,5068300,5235600,5406700,5582000,5759400,5939400,6120900,6305100,6490300,6675000,6866100,7058200,7250800,7419100,7568600,7701100,7819100,7924800,8019600,8106800,8184600,8250400,0,0,0,0,0,0,0,0,0],2:[0,4563500,4719000,4876600,5035600,5197000,5358400,5522100,5685500,5850100,6014400,6179600,6350500,6522400,6678100,6821500,6952900,7073900,7184600,7286800,7380000,7465300,7543500,7615000,7673600,7729500,0,0,0,0,0,0,0],3:[0,4167700,4307600,4451700,4596800,4744300,4893200,5044000,5195000,5347400,5499600,5652200,5810200,5957200,6093600,6219400,6336500,6445400,6546700,6640300,6728100,6809300,6884500,6953800,7018800,7071800,7122700,7169800,0,0,0,0,0],4:[0,3619000,3751300,3885800,4023500,4163000,4304000,4446100,4588900,4732300,4875500,5019900,5155900,5282900,5401600,5513300,5618700,5716500,5807900,5893300,5973100,6047600,6117500,6183200,6245100,6301600,6349600,6393700,6436100,0,0,0,0],5:[0,3126100,3243100,3364700,3491000,3620600,3752700,3887000,4022900,4159300,4296500,4425000,4548700,4666100,4775600,4879100,4976500,5068100,5154500,5236000,5312400,5384200,5451700,5515300,5574900,5631200,5684200,5728100,5770400,5809200,5846900,0,0],6:[0,2568400,2679400,2794000,2911100,3031800,3155800,3280100,3404900,3530100,3647400,3758800,3868400,3971500,4068800,4162400,4250000,4333800,4412800,4487900,4558500,4626200,4690200,4750100,4807300,4861500,4912900,4961600,5002600,5040800,5078500,5113500,5146400],7:[0,2472100,2493100,2539000,2610800,2710600,2826000,2942100,3059100,3170300,3276600,3376800,3475200,3568600,3657900,3743200,3823900,3901400,3975500,4045300,4111700,4175200,4235000,4293000,4347900,4399900,4449900,4492000,4531300,4569300,4605800,4639900,0],8:[0,2215300,2245500,2290400,2350700,2427500,2522200,2628900,2731700,2829500,2922200,3012000,3099500,3183800,3264300,3341600,3416300,3486000,3553600,3618500,3680400,3739400,3796100,3850000,3902200,3951600,3999600,4039500,4078000,4114300,4149600,4183800,0],9:[0,2133000,2148600,2174000,2209500,2255500,2312600,2381600,2463400,2552800,2638600,2720500,2802100,2880000,2955600,3028100,3098400,3166800,3230600,3293300,3353200,3409400,3463600,3515100,3564900,3612000,3654600,3691600,3727000,3761200,3794400,3827000,0]};
+const B5={연구관:[0,2896400,3038400,3180100,3322000,3463400,3668200,3872200,4075900,4278800,4481600,4662200,4842600,5020600,5200000,5377800,5550900,5723200,5896100,6067000,6238400,6381100,6522800,6665000,6806500,6948400,7067000,7187000,7306100,7424400,7543300,7635200,7727300],연구사:[0,2317100,2391800,2477300,2574400,2684300,2816200,2948500,3080700,3211900,3343400,3442300,3541300,3640700,3739800,3838500,3917400,3995500,4074600,4152500,4231200,4306800,4383100,4459100,4534900,4610300,4662700,4714800,4767300,4817800,4869900,4921800,4967300,0,0,0,0]};
+const B6={지도관:[0,2896400,3036700,3176300,3316600,3454600,3638500,3822500,4006900,4190200,4372400,4537300,4701200,4865100,5028200,5190200,5333100,5478300,5622000,5764400,5906500,6033200,6160500,6287000,6413400,6540000,6650700,6760600,6871300,6980800,7092100,7166500,7241800],지도사:[0,2162100,2231300,2307600,2391700,2484100,2585700,2706300,2826000,2945900,3065400,3168300,3270800,3372800,3474300,3574600,3665100,3755400,3844800,3934000,4023700,4106700,4190200,4272700,4355300,4437400,4499400,4562200,4625000,4687500,4749000,4802900,4849900,0,0,0,0]};
+const B10={치안정감_소방정감:[0,4905100,5068300,5235600,5406700,5582000,5759400,5939400,6120900,6305100,6490300,6675000,6866100,7058200,7250800,7419100,7568600,7701100,7819100,7924800,8019600,8106800,8184600,8250400,0,0,0,0,0,0,0,0,0],치안감_소방감:[0,4563500,4719000,4876600,5035600,5197000,5358400,5522100,5685500,5850100,6014400,6179600,6350500,6522400,6678100,6821500,6952900,7073900,7184600,7286800,7380000,7465300,7543500,7615000,7673600,7729500,0,0,0,0,0,0,0],경무관_소방준감:[0,4167700,4307600,4451700,4596800,4744300,4893200,5044000,5195000,5347400,5499600,5652200,5810200,5957200,6093600,6219400,6336500,6445400,6546700,6640300,6728100,6809300,6884500,6953800,7018800,7071800,7122700,7169800,0,0,0,0,0],총경_소방정:[0,3619000,3751300,3885800,4023500,4163000,4304000,4446100,4588900,4732300,4875500,5019900,5155900,5282900,5401600,5513300,5618700,5716500,5807900,5893300,5973100,6047600,6117500,6183200,6245100,6301600,6349600,6393700,6436100,0,0,0,0],경정_소방령:[0,3126100,3243100,3364700,3491000,3620600,3752700,3887000,4022900,4159300,4296500,4425000,4548700,4666100,4775600,4879100,4976500,5068100,5154500,5236000,5312400,5384200,5451700,5515300,5574900,5631200,5684200,5728100,5770400,5809200,5846900,0,0],경감_소방경:[0,2698600,2814700,2933000,3054900,3178700,3305500,3435100,3565700,3697600,3820800,3937600,4051200,4158400,4261000,4357000,4449500,4535400,4618100,4695400,4768800,4837900,4904700,4965900,5025200,5081100,5134000,5183300,5225600,5264800,5303200,5338600,5372500],경위_소방위:[0,2507700,2567700,2640000,2758200,2879500,3001800,3125400,3249000,3373300,3490700,3600800,3709400,3812400,3909100,4002700,4090100,4173700,4252700,4327900,4399300,4467200,4531200,4592000,4650300,4705700,4756500,4800000,4841900,4881500,4918600,4954300,0],경사_소방장:[0,2472100,2493100,2539000,2610800,2710600,2826000,2942100,3059100,3170300,3276600,3376800,3475200,3568600,3657900,3743200,3823900,3901400,3975500,4045300,4111700,4175200,4235000,4293000,4347900,4399900,4449900,4492000,4531300,4569300,4605800,4639900,0],경장_소방교:[0,2215300,2245500,2290400,2350700,2427500,2522200,2628900,2731700,2829500,2922200,3012000,3099500,3183800,3264300,3341600,3416300,3486000,3553600,3618500,3680400,3739400,3796100,3850000,3902200,3951600,3999600,4039500,4078000,4114300,4149600,4183800,0],순경_소방사:[0,2133000,2155600,2187500,2229200,2281100,2343900,2418400,2505600,2595100,2680900,2762900,2844100,2922200,2998100,3070500,3140600,3209100,3273000,3335700,3395400,3451600,3506000,3557600,3607200,3654200,3697100,3733900,3769300,3803400,3836800,3869200,0]};
+const B11=[0,2041500,2103300,2166000,2228500,2291500,2354400,2416600,2478600,2495600,2516700,2538300,2585900,2657500,2773700,2889700,3006200,3121000,3241500,3361200,3481000,3600700,3733600,3865300,3997500,4129400,4261900,4400100,4538000,4682100,4826800,4971100,5115200,5261600,5407500,5553600,5699100,5825700,5952500,6079500,6205700];
+const B13={대장:9618800,중장:9447300,소장:[0,6099000,6249900,6400800,6551700,6702600,6853500,7004400,7155300,7306200,7457100,7608000,7758900,7909800],준장:[0,5753700,5903200,6052700,6202200,6351700,6501200,6650700,6800200,6949700,7099200,7248700,7398200,7547700],대령:[0,4671200,4828300,4985400,5142500,5299600,5456700,5613800,5770900,5928000,6085100,6242200,6399300,6556400,6713500,6870600],중령:[0,4105800,4262800,4419800,4576800,4733800,4890800,5047800,5204800,5361800,5518800,5675800,5832800,5989800,6146800,6303800],소령:[0,3382700,3536000,3689300,3842600,3995900,4149200,4302500,4455800,4609100,4762400,4915700,5069000,5222300,5375600],대위:[0,2805000,2922900,3040800,3185400,3330000,3474600,3619200,3763800,3908400,4053000,4197600,4342200],중위:[0,2306700,2385000,2463300,2541600,2619900,2741300,2862700],소위:[0,2150400,2240400,2330400],준위:[0,2544300,2665400,2786500,2907600,3028700,3149800,3270900,3392000,3513100,3634200,3755300,3876400,3997500,4118600,4239700,4360800,4481900,4603000,4724100,4845200,4966300,5087400,5208500,5329600,5450700,5571800,5692900],원사:[0,3568100,3682100,3796100,3910100,4024100,4138100,4252100,4366100,4480100,4594100,4708100,4822100,4936100,5050100,5164100],상사:[0,2468000,2577500,2687000,2796500,2906000,3015500,3125000,3234500,3344000,3453500,3563000,3672500,3782000,3891500,4001000,4110500,4220000,4329500,4439000],중사:[0,2181500,2252000,2322500,2393000,2463500,2534000,2604500,2706900,2809300,2911700,3014100,3116500,3218900,3321300,3423700,3526100,3628500,3730900,3833300,3935700,4038100,4140500],하사:[0,2133000,2154300,2175600,2196900,2218200,2249100,2280000,2310900,2341800,2372700],병장:1500000,상병:1200000,일병:900000,이병:750000};
+const POS_ALLOW={gen:{1:750000,2:650000,3:550000,4:450000,5:350000,6:250000,7:220000,8:200000,9:175000},pub:{1:750000,2:650000,3:550000,4:450000,5:350000,6:250000,7:220000,8:200000,9:175000},res:{연구관:350000,연구사:220000},ext:{지도관:350000,지도사:220000},pol:{치안정감_소방정감:750000,치안감_소방감:650000,경무관_소방준감:550000,총경_소방정:450000,경정_소방령:350000,경감_소방경:250000,경위_소방위:220000,경사_소방장:220000,경장_소방교:200000,순경_소방사:175000},tea:250000,mil:{대장:750000,중장:750000,소장:750000,준장:750000,대령:650000,중령:550000,소령:450000,대위:350000,중위:220000,소위:220000,준위:250000,원사:250000,상사:220000,중사:200000,하사:175000}};
+const SERIES=[{k:'gen',e:'🏛',l:'일반직',sl:'행정/기술직',danger:false,tch:false,sol:false,milOff:false},{k:'pub',e:'⚖️',l:'공안직',sl:'교정·검찰·경호',danger:false,tch:false,sol:false,milOff:false},{k:'res',e:'🔬',l:'연구직',sl:'연구관·연구사',danger:false,tch:false,sol:false,milOff:false},{k:'ext',e:'🌾',l:'지도직',sl:'지도관·지도사',danger:false,tch:false,sol:false,milOff:false},{k:'pol',e:'👮',l:'경찰·소방',sl:'경찰/소방직',danger:true,tch:false,sol:false,milOff:false},{k:'tea',e:'📚',l:'교육직',sl:'유·초·중·고 교원',danger:false,tch:true,sol:false,milOff:false},{k:'milS',e:'🪖',l:'군인(병사)',sl:'이병~병장',danger:false,tch:false,sol:true,milOff:false},{k:'milO',e:'⭐',l:'군인(간부)',sl:'하사~대장',danger:true,tch:false,sol:false,milOff:true}];
+const GRADES={gen:[9,8,7,6,5,4,3,2,1].map(g=>({l:`${g}급`,v:g})),pub:[9,8,7,6,5,4,3,2,1].map(g=>({l:`${g}급`,v:g})),res:[{l:'연구관',v:'연구관'},{l:'연구사',v:'연구사'}],ext:[{l:'지도관',v:'지도관'},{l:'지도사',v:'지도사'}],pol:Object.keys(B10).map(k=>({l:k.replace(/_/g,'·'),v:k})),tea:[{l:'교사(유·초·중·고)',v:'교사'}],milS:[{l:'병장',v:'병장'},{l:'상병',v:'상병'},{l:'일병',v:'일병'},{l:'이병',v:'이병'}],milO:[{l:'하사',v:'하사'},{l:'중사',v:'중사'},{l:'상사',v:'상사'},{l:'원사',v:'원사'},{l:'준위',v:'준위'},{l:'소위',v:'소위'},{l:'중위',v:'중위'},{l:'대위',v:'대위'},{l:'소령',v:'소령'},{l:'중령',v:'중령'},{l:'대령',v:'대령'},{l:'준장',v:'준장'},{l:'소장',v:'소장'},{l:'중장',v:'중장'},{l:'대장',v:'대장'}]};
+const MAX_STEP={gen:{1:23,2:25,3:27,4:28,5:30,6:32,7:31,8:31,9:31},pub:{1:23,2:25,3:27,4:28,5:30,6:32,7:31,8:31,9:31},res:{연구관:32,연구사:36},ext:{지도관:32,지도사:36},pol:{치안정감_소방정감:23,치안감_소방감:25,경무관_소방준감:27,총경_소방정:28,경정_소방령:30,경감_소방경:32,경위_소방위:31,경사_소방장:31,경장_소방교:31,순경_소방사:31},tea:{교사:40},milS:{병장:1,상병:1,일병:1,이병:1},milO:{하사:10,중사:22,상사:19,원사:15,준위:27,소위:3,중위:7,대위:12,소령:14,중령:15,대령:15,준장:13,소장:13,중장:13,대장:1}};
+const SP_WORK={sp_tech:{name:'기술정보수당',note:'기술직군·정보통신·전산 등',warn:false,items:[{k:'t1',l:'5급 이상·경정이상',amt:50000},{k:'t2',l:'6·7급·경감·경위',amt:30000},{k:'t3',l:'8급이하·경사 이하',amt:20000},{k:'t4',l:'지도관',amt:60000},{k:'t5',l:'지도사',amt:50000},{k:'t9',l:'기술사 자격 보유자',amt:50000},{k:'t10',l:'기능장·기사 자격',amt:30000},{k:'t11',l:'산업기사 자격',amt:20000}]},sp_research:{name:'연구업무수당',note:'연구직공무원 및 연구기관',warn:false,items:[{k:'r1',l:'연구관 (일반)',amt:80000},{k:'r3',l:'연구사',amt:60000},{k:'r4',l:'국과수 감정·연구직',amt:80000}]},sp_med:{name:'의료업무수당',note:'의료직렬·보건직렬 종사자',warn:true,warnMsg:'⚠️ 보건진료원 등은 별도 법령 적용으로 정확한 산출이 어렵습니다.',items:[{k:'m1',l:'의사·치과의사·한의사 (5급이상)',amt:400000},{k:'m2',l:'의사·치과의사·한의사 (6급이하)',amt:350000},{k:'m3',l:'약사 (5급이상)',amt:200000},{k:'m5',l:'간호사 (5급이상)',amt:100000},{k:'m6',l:'간호사 (6~7급)',amt:80000},{k:'m8',l:'보건직 (5급이상)',amt:80000},{k:'m9',l:'보건직 (6~7급)',amt:60000}]},sp_civil:{name:'민원업무수당',note:'민원창구 상시 직접 담당자',warn:false,items:[{k:'c1',l:'민원창구 직접 담당 (6급이하)',amt:80000},{k:'c2',l:'민원창구 직접 담당 (5급이상)',amt:50000}]},sp_special:{name:'특수직무수당',note:'특정 기관·업무 종사자',warn:false,items:[{k:'sp5',l:'소방 현장대응 직무',amt:100000},{k:'sp6',l:'경찰 형사·수사 직무',amt:80000},{k:'sp8',l:'폭발물 처리 업무',amt:200000},{k:'sp9',l:'방사선·독성물질 취급',amt:100000}]}};
+const LOC_GRADES=[{k:'ga',l:'갑종 (최고위험·최오지)',amt:600000},{k:'eul',l:'을종 (고위험·오지)',amt:500000},{k:'byung',l:'병종 (준오지·격오지)',amt:400000},{k:'jeong',l:'정종 (벽지)',amt:300000},{k:'mu',l:'무종 (특수환경)',amt:200000},{k:'tea1',l:'도서벽지 1급지 (교원)',amt:600000},{k:'tea2',l:'도서벽지 2급지 (교원)',amt:500000},{k:'tea3',l:'도서벽지 3급지 (교원)',amt:400000},{k:'tea4',l:'도서벽지 4급지 (교원)',amt:300000}];
+
+// ════════════════ 계산 함수 ════════════════
+function getBase(s,g,step){
+  if(s==='gen') return B3[g]?.[step]||0;
+  if(s==='pub') return B4[g]?.[step]||0;
+  if(s==='res') return B5[g]?.[step]||0;
+  if(s==='ext') return B6[g]?.[step]||0;
+  if(s==='pol') return B10[g]?.[step]||0;
+  if(s==='tea') return B11[step]||0;
+  if(s==='milS') return B13[g]||0;
+  if(s==='milO'){const t=B13[g];return typeof t==='number'?t:t?.[step]||0;}
+  return 0;
+}
+function getPosAllow(s,g){
+  if(s==='gen') return POS_ALLOW.gen[g]||175000;
+  if(s==='pub') return POS_ALLOW.pub[g]||175000;
+  if(s==='res') return POS_ALLOW.res[g]||220000;
+  if(s==='ext') return POS_ALLOW.ext[g]||220000;
+  if(s==='pol') return POS_ALLOW.pol[g]||175000;
+  if(s==='tea') return POS_ALLOW.tea;
+  if(s==='milS') return 0;
+  if(s==='milO') return POS_ALLOW.mil[g]||175000;
+  return 0;
+}
+function getGeunRate(y){if(y<1)return 0.10;if(y<2)return 0.10;if(y<3)return 0.15;if(y<4)return 0.20;if(y<5)return 0.25;if(y<6)return 0.30;if(y<7)return 0.35;if(y<8)return 0.40;if(y<9)return 0.45;return 0.50;}
+function getGeunAdd(y){if(y<3)return 30000;if(y<5)return 50000;if(y<10)return 70000;if(y<15)return 100000;if(y<20)return 120000;return 130000;}
+function calcTax(annual){let d;if(annual<=5e6)d=annual*0.7;else if(annual<=15e6)d=3500000+(annual-5e6)*0.4;else if(annual<=45e6)d=7500000+(annual-15e6)*0.15;else if(annual<=1e8)d=12000000+(annual-45e6)*0.05;else d=14750000+(annual-1e8)*0.02;const t=Math.max(0,annual-d-1500000);const brk=[{l:14e6,r:.06,d:0},{l:50e6,r:.15,d:1260000},{l:88e6,r:.24,d:5760000},{l:150e6,r:.35,d:15440000},{l:Infinity,r:.40,d:25940000}];const b=brk.find(x=>t<=x.l);return Math.max(0,t*b.r-b.d);}
+function calcNet(s,g,step,years,a){
+  const isSol=s==='milS';
+  const base=getBase(s,g,step);
+  if(isSol) return {netM:base,monthlyFixed:base,annualGross:base*12,netA:base*12,base,deduction:0,pension:0,health:0,ltc:0,emp:0,taxTotal:0,insTotal:0};
+  const pos=getPosAllow(s,g);
+  const meal=a?.meal!==false?140000:0;
+  const geunAdd=getGeunAdd(years);
+  const family=(a?.family_sp?40000:0)+(a?.child1?50000:0)+(a?.child2?80000:0)+(a?.child3?120000*Math.max(1,a?.child3n||1):0);
+  const over=a?.overtime?(105790+Math.round((base/209)*1.5*Math.max(0,(a?.ot_h||10)-10))):0;
+  const nightAmt=a?.night?Math.round((base/209)*1.5*(a?.night_h||0)*0.5):0;
+  const dangerAmt=(SERIES.find(x=>x.k===s)?.danger&&a?.danger)?a?.danger_amt||80000:0;
+  const tchDuty=(s==='tea'&&a?.tch_duty)?250000:0;
+  const tchRes=(s==='tea'&&a?.tch_research)?50000:0;
+  const tchClass=(s==='tea'&&a?.tch_class)?130000:0;
+  const tchHead=(s==='tea'&&a?.tch_head)?100000:0;
+  const specialAmt=a?.special?a?.special_amt||0:0;
+  const transAmt=a?.transport?a?.transport_amt||200000:0;
+  let spWorkTotal=0;
+  Object.entries(SP_WORK).forEach(([key,cat])=>{if(a?.[key]&&a?.[key+'_key']){const item=cat.items.find(i=>i.k===a[key+'_key']);if(item)spWorkTotal+=item.amt;}});
+  let locAmt=0;
+  if(a?.loc_on&&a?.loc_grade){const g2=LOC_GRADES.find(x=>x.k===a.loc_grade);if(g2)locAmt=g2.amt;}
+  const monthlyFixed=base+pos+meal+geunAdd+family+over+nightAmt+dangerAmt+tchDuty+tchRes+tchClass+tchHead+specialAmt+transAmt+spWorkTotal+locAmt;
+  const geunRate=getGeunRate(years);
+  const geunAnnual=base*geunRate*2;
+  const myeongjel=base*0.6*2;
+  const welfare=a?.welfare?a?.welfare_amt||1000000:0;
+  const perf=base*0.70;
+  const annualGross=monthlyFixed*12+geunAnnual+myeongjel+welfare+perf;
+  const pension=Math.round(base*0.09);
+  const health=Math.round(base*0.03545);
+  const ltc=Math.round(health*0.1281);
+  const emp=Math.round(base*0.009);
+  const insTotal=pension+health+ltc+emp;
+  const annTax=calcTax(annualGross);
+  const mTax=Math.round(annTax/12);
+  const lTax=Math.round(mTax*0.1);
+  const taxTotal=mTax+lTax;
+  const deduction=insTotal+taxTotal;
+  const netM=monthlyFixed-deduction;
+  const netA=netM*12+geunAnnual+myeongjel+welfare+perf;
+  return{base,pos,meal,geunAdd,family,over,nightAmt,dangerAmt,monthlyFixed,geunAnnual,myeongjel,welfare,perf,annualGross,pension,health,ltc,emp,insTotal,taxTotal,deduction,netM,netA};
+}
+const fmt=n=>Math.round(n).toLocaleString('ko-KR')+'원';
+const fmtN=n=>Math.round(n).toLocaleString('ko-KR');
+
+// ════════════════ 상태 ════════════════
+let st={s:'gen',g:9,step:1,years:0,tab:'월급',a:{meal:true,overtime:false,ot_h:10,night:false,night_h:0,danger:false,danger_amt:80000,tch_duty:false,tch_research:false,tch_class:false,tch_head:false,family_sp:false,child1:false,child2:false,child3:false,child3n:1,transport:false,transport_amt:200000,welfare:true,welfare_amt:1000000,sp_tech:false,sp_tech_key:'',sp_research:false,sp_research_key:'',sp_med:false,sp_med_key:'',sp_civil:false,sp_civil_key:'',sp_special:false,sp_special_key:'',loc_on:false,loc_grade:''}};
+let lastResult={};
+
+// ════════════════ 페이지 전환 ════════════════
+function switchPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('on');
+  if(name==='compare') initCompare();
+  if(name==='pension') initPension();
+  if(name==='me') renderMe();
+}
+
+// ════════════════ 비교 모드 ════════════════
+let cmpMode = 'gov';
+let salInputMode = 'annual';
+let salMode = 'calc'; // 'calc' | 'direct'
+
+function setCmpMode(mode){
+  cmpMode = mode;
+  const b1=document.getElementById('cmpModeBtn1');
+  const b2=document.getElementById('cmpModeBtn2');
+  if(mode==='gov'){
+    b1.style.background='var(--accent)';b1.style.color='#fff';
+    b2.style.background='transparent';b2.style.color='var(--muted)';
+    document.getElementById('cmpGovMode').style.display='block';
+    document.getElementById('cmpSalMode').style.display='none';
+    document.getElementById('longTermCard').style.display='none';
+    document.getElementById('cmpSalNote').style.display='none';
+    document.getElementById('cmpBarLblA').textContent='A';
+    document.getElementById('cmpBarLblB').textContent='B';
+    calcCompare();
+  } else {
+    b2.style.background='var(--accent)';b2.style.color='#fff';
+    b1.style.background='transparent';b1.style.color='var(--muted)';
+    document.getElementById('cmpGovMode').style.display='none';
+    document.getElementById('cmpSalMode').style.display='block';
+    document.getElementById('cmpSalNote').style.display='block';
+    document.getElementById('cmpBarLblA').textContent='공무원';
+    document.getElementById('cmpBarLblB').textContent='회사원';
+    calcSalCompare();
+  }
+}
+
+// 회사원 입력 모드 (계산/직접입력)
+function setSalMode(mode){
+  salMode = mode;
+  const bc=document.getElementById('salModeCalc');
+  const bd=document.getElementById('salModeDirect');
+  if(mode==='calc'){
+    bc.style.background='var(--accent)';bc.style.color='#fff';
+    bd.style.background='transparent';bd.style.color='var(--muted)';
+    document.getElementById('salCalcWrap').style.display='block';
+    document.getElementById('salDirectWrap').style.display='none';
+  } else {
+    bd.style.background='var(--accent)';bd.style.color='#fff';
+    bc.style.background='transparent';bc.style.color='var(--muted)';
+    document.getElementById('salCalcWrap').style.display='none';
+    document.getElementById('salDirectWrap').style.display='block';
+  }
+  calcSalCompare();
+}
+
+function setSalInputMode(mode){
+  salInputMode = mode;
+  const bAnn=document.getElementById('salInputModeAnn');
+  const bMon=document.getElementById('salInputModeMon');
+  if(mode==='annual'){
+    bAnn.style.background='var(--accent)';bAnn.style.color='#fff';bAnn.style.borderColor='var(--accent)';
+    bMon.style.background='#fff';bMon.style.color='var(--muted)';bMon.style.borderColor='var(--border)';
+    document.getElementById('salAnnualWrap').style.display='block';
+    document.getElementById('salMonthlyWrap').style.display='none';
+  } else {
+    bMon.style.background='var(--accent)';bMon.style.color='#fff';bMon.style.borderColor='var(--accent)';
+    bAnn.style.background='#fff';bAnn.style.color='var(--muted)';bAnn.style.borderColor='var(--border)';
+    document.getElementById('salAnnualWrap').style.display='none';
+    document.getElementById('salMonthlyWrap').style.display='block';
+  }
+  calcSalCompare();
+}
+
+// 직종별 연봉 테이블 (만원 단위, 연차별 [1,3,5,7,10,15,20,25,30])
+const JOB_SAL={
+  general:[2800,3100,3500,3900,4400,5000,5600,6200,6800],
+  it:     [3200,3800,4500,5200,6200,7200,8200,9000,9800],
+  finance:[3000,3400,4000,4600,5400,6200,7200,8200,9000],
+  sales:  [2800,3200,3700,4200,4900,5600,6300,7000,7800],
+  mfg:    [2700,3000,3300,3700,4200,4800,5400,5900,6400],
+  med:    [3000,3500,4200,5000,5800,6800,7800,8600,9400],
+  edu:    [2900,3200,3700,4200,4800,5500,6100,6700,7300],
+};
+const JOB_STEPS=[1,3,5,7,10,15,20,25,30];
+
+function getEstimatedSalary(jobType, years){
+  const steps=JOB_STEPS;
+  const sals=(JOB_SAL[jobType]||JOB_SAL.general).map(v=>v*10000);
+  if(years<=steps[0]) return sals[0];
+  for(let i=1;i<steps.length;i++){
+    if(years<=steps[i]){
+      const t=(years-steps[i-1])/(steps[i]-steps[i-1]);
+      return Math.round(sals[i-1]+(sals[i]-sals[i-1])*t);
+    }
+  }
+  return sals[sals.length-1];
+}
+
+// 회사원 세후 실수령액 계산
+function calcWorkerNet(annualGross){
+  const monthly=Math.round(annualGross/12);
+  const pension =Math.round(monthly*0.045);
+  const health  =Math.round(monthly*0.03545);
+  const ltc     =Math.round(health*0.1281);
+  const employ  =Math.round(monthly*0.009);
+  const insTotal=pension+health+ltc+employ;
+  const taxable=annualGross-insTotal*12;
+  const annTax=calcTax(taxable);
+  const mTax=Math.round(annTax/12);
+  const lTax=Math.round(mTax*0.1);
+  const taxTotal=mTax+lTax;
+  const deduction=insTotal+taxTotal;
+  const netM=monthly-deduction;
+  const netA=netM*12;
+  return{monthly,pension,health,ltc,employ,insTotal,mTax,lTax,taxTotal,deduction,netM,netA};
+}
+
+function calcSalCompare(){
+  // 공무원 (계산기 연동)
+  const r=calcNet(st.s,st.g,st.step,st.years,st.a);
+  const series=SERIES.find(x=>x.k===st.s);
+  const grade=GRADES[st.s]?.find(x=>String(x.v)===String(st.g));
+  const govLabel=`${series?.l||''} ${grade?.l||''} ${st.s==='milS'?'':st.step+'호봉'}`;
+  document.getElementById('salGovInfo').textContent=govLabel;
+  document.getElementById('salGovGross').textContent=fmt(r.monthlyFixed);
+  document.getElementById('salGovNet').textContent=fmt(r.netM);
+  document.getElementById('salGovAnnual').textContent=`연 실수령 ${fmt(r.netA)}`;
+  document.getElementById('salGovAnnualGross').textContent=`세전 연봉 ${fmt(r.annualGross)}`;
+
+  // 회사원 연봉 결정
+  let annual=0;
+  if(salMode==='calc'){
+    const job=document.getElementById('salJobType').value;
+    const years=parseInt(document.getElementById('salYearsRange').value)||5;
+    annual=getEstimatedSalary(job,years);
+    document.getElementById('salEstimated').textContent=`약 ${fmt(annual)}`;
+  } else {
+    if(salInputMode==='annual'){
+      annual=parseInt(document.getElementById('salAnnualInput').value)||0;
+    } else {
+      annual=(parseInt(document.getElementById('salMonthlyInput').value)||0)*12;
+    }
+  }
+
+  if(!annual){
+    document.getElementById('salWorkerGross').textContent='-';
+    document.getElementById('salWorkerNet').textContent='-';
+    document.getElementById('salWorkerAnnual').textContent='';
+    document.getElementById('salWorkerAnnualGross').textContent='';
+    document.getElementById('salWorkerDetail').style.display='none';
+    document.getElementById('cmpDiff').textContent='-';
+    return;
+  }
+
+  const wr=calcWorkerNet(annual);
+  document.getElementById('salWorkerGross').textContent=fmt(wr.monthly);
+  document.getElementById('salWorkerNet').textContent=fmt(wr.netM);
+  document.getElementById('salWorkerAnnual').textContent=`연 실수령 ${fmt(wr.netA)}`;
+  document.getElementById('salWorkerAnnualGross').textContent=`세전 연봉 ${fmt(annual)}`;
+
+  // 공제 상세
+  const det=document.getElementById('salWorkerDetail');
+  det.style.display='block';
+  const rowF=(l,v,c='var(--text)')=>`<div class="drow"><span class="dl">${l}</span><span class="dv" style="color:${c}">${v}</span></div>`;
+  document.getElementById('salWorkerRows').innerHTML=
+    rowF('세전 연봉',fmt(annual))+
+    rowF('세전 월급',fmt(wr.monthly))+
+    rowF('국민연금 (4.5%)',`-${fmt(wr.pension)}`,'var(--red)')+
+    rowF('건강보험 (3.545%)',`-${fmt(wr.health)}`,'var(--red)')+
+    rowF('장기요양보험',`-${fmt(wr.ltc)}`,'var(--red)')+
+    rowF('고용보험 (0.9%)',`-${fmt(wr.employ)}`,'var(--red)')+
+    rowF('소득세+지방세',`-${fmt(wr.taxTotal)}`,'var(--red)')+
+    rowF('총 공제액',`-${fmt(wr.deduction)}`,'var(--red)');
+
+  // 비교 결과
+  const diff=r.netM-wr.netM;
+  const diffEl=document.getElementById('cmpDiff');
+  if(diff===0){
+    diffEl.innerHTML='공무원과 회사원 실수령액이 동일해요';
+    diffEl.style.color='var(--green)';
+  } else {
+    const who=diff>0?'공무원':'회사원';
+    diffEl.innerHTML=`<span style="color:${diff>0?'var(--accent)':'var(--gold)'}">${who}</span>이 월 <strong>${fmt(Math.abs(diff))}</strong> 더 많아요`;
+    diffEl.style.color='var(--text)';
+  }
+  const total=r.netM+wr.netM;
+  document.getElementById('cmpBarA').style.width=total?`${(r.netM/total)*100}%`:'50%';
+
+  // 상세표 — 공무원 vs 공무원과 동일한 형식
+  const rowT=(l,a,b)=>`<div class="drow">
+    <span class="dl" style="flex:1">${l}</span>
+    <span style="font-size:12px;font-weight:700;color:var(--accent);min-width:86px;text-align:right">${a}</span>
+    <span style="font-size:12px;font-weight:700;color:var(--gold);min-width:86px;text-align:right">${b}</span>
+  </div>`;
+
+  document.getElementById('cmpDetailList').innerHTML =
+    `<div style="display:flex;justify-content:flex-end;gap:4px;margin-bottom:4px">
+       <span style="font-size:10px;font-weight:700;color:var(--accent);min-width:86px;text-align:right">공무원</span>
+       <span style="font-size:10px;font-weight:700;color:var(--gold);min-width:86px;text-align:right">회사원</span>
+     </div>` +
+    rowT('기본급', fmt(r.base), '-') +
+    rowT('직급보조비', fmt(r.pos), '-') +
+    rowT('수당 합계', fmt(r.monthlyFixed - r.base - r.pos), '-') +
+    rowT('월 세전 합계', fmt(r.monthlyFixed), fmt(wr.monthly)) +
+    rowT('연금/국민연금', `-${fmt(r.pension)}`, `-${fmt(wr.pension)}`) +
+    rowT('건강보험', `-${fmt(r.health)}`, `-${fmt(wr.health)}`) +
+    rowT('고용보험', `-${fmt(r.emp)}`, `-${fmt(wr.employ)}`) +
+    rowT('소득세+지방세', `-${fmt(r.taxTotal)}`, `-${fmt(wr.taxTotal)}`) +
+    rowT('월 실수령액', fmt(r.netM), fmt(wr.netM)) +
+    rowT('세전 연봉', fmt(r.annualGross), fmt(annual)) +
+    rowT('연 실수령액', fmt(r.netA), fmt(wr.netA));
+
+  // 장기 관점
+  const ltCard=document.getElementById('longTermCard');
+  ltCard.style.display='block';
+  const wkYrs=parseInt(document.getElementById('salYearsRange')?.value)||5;
+  const pensionMon=Math.round(r.base*0.09*30/12*0.6);
+  const retirePay=Math.round(wr.monthly*30);
+  document.getElementById('longTermRows').innerHTML=
+    rowF('공무원연금 예상월액 (재직 30년)',fmt(pensionMon),'var(--accent)')+
+    rowF('회사원 퇴직금 합계 (30년)',fmt(retirePay),'var(--gold)')+
+    `<div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.8">
+      ※ 공무원연금: 기여율 9%·재직 30년·지급률 1.7% 기준 추정<br>
+      ※ 퇴직금: 퇴직 전 3개월 평균임금×재직일수÷365 간이 계산
+    </div>`;
+}
+
+// ════════════════ 공무원연금 계산기 ════════════════
+let penMode = 'calc'; // 'calc' | 'direct'
+
+function initPension(){
+  setPenMode('calc');
+  calcPension();
+}
+
+function setPenMode(mode){
+  penMode = mode;
+  const bc=document.getElementById('penModeCalc');
+  const bd=document.getElementById('penModeDirect');
+  if(mode==='calc'){
+    bc.style.background='var(--accent)';bc.style.color='#fff';
+    bd.style.background='transparent';bd.style.color='var(--muted)';
+    document.getElementById('penCalcInfo').style.display='block';
+    document.getElementById('penDirectWrap').style.display='none';
+  } else {
+    bd.style.background='var(--accent)';bd.style.color='#fff';
+    bc.style.background='transparent';bc.style.color='var(--muted)';
+    document.getElementById('penCalcInfo').style.display='none';
+    document.getElementById('penDirectWrap').style.display='block';
+  }
+  calcPension();
+}
+
+function calcPension(){
+  const age      =parseInt(document.getElementById('penAge').value)||30;
+  const startYear=parseInt(document.getElementById('penStartYear').value)||2020;
+  const retireAge=parseInt(document.getElementById('penRetireAge').value)||60;
+  const growth   =parseFloat(document.getElementById('penGrowthRange').value)||2;
+  const workYears=Math.max(1, retireAge - age + (new Date().getFullYear() - startYear));
+  document.getElementById('penYearsDisplay').textContent = workYears + '년';
+
+  // 현재 기본급
+  let currentBase;
+  if(penMode==='calc'){
+    currentBase = getBase(st.s, st.g, st.step);
+    const series=SERIES.find(x=>x.k===st.s);
+    const grade=GRADES[st.s]?.find(x=>String(x.v)===String(st.g));
+    document.getElementById('penCurrentBase').textContent = fmt(currentBase);
+    document.getElementById('penCurrentLabel').textContent = `${series?.l||''} ${grade?.l||''} ${st.step}호봉`;
+  } else {
+    currentBase = parseInt(document.getElementById('penBaseInput').value)||2500000;
+  }
+
+  if(!currentBase){ return; }
+
+  // 퇴직 시 기본급 (연평균 상승률 적용)
+  const yearsToRetire = retireAge - age;
+  const retireBase = Math.round(currentBase * Math.pow(1 + growth/100, Math.max(0, yearsToRetire)));
+
+  // 평균기준소득월액 (현재~퇴직 기간 평균, 단순 산술평균 근사)
+  const avgBase = Math.round((currentBase + retireBase) / 2);
+
+  // 공무원연금 월액 = 평균기준소득월액 × 재직기간 × 1.7% (2016년 이후 임용자)
+  const penRate = 0.017;
+  const monthlyPension = Math.round(avgBase * workYears * penRate);
+
+  // 총 납입 기여금 (9%, 근사치)
+  const totalContrib = Math.round(avgBase * 0.09 * 12 * workYears);
+
+  // 손익분기 (총납입 ÷ 월연금액)
+  const breakEvenMonths = monthlyPension > 0 ? Math.ceil(totalContrib / monthlyPension) : 0;
+  const breakEvenYears  = Math.floor(breakEvenMonths / 12);
+  const breakEvenMon    = breakEvenMonths % 12;
+
+  // 연금 수령 시작 나이 (2016년 이후 임용 → 65세)
+  const pensionStartAge = startYear >= 2016 ? 65 : 60;
+
+  document.getElementById('penMonthly').textContent     = fmt(monthlyPension);
+  document.getElementById('penResultSub').textContent   = `재직 ${workYears}년 · 평균기준소득 ${fmt(avgBase)}`;
+  document.getElementById('penAnnual').textContent      = fmt(monthlyPension * 12);
+  document.getElementById('penTotalContrib').textContent = fmt(totalContrib);
+  document.getElementById('penBreakEven').textContent   = breakEvenYears>0 ? `${breakEvenYears}년 ${breakEvenMon}개월` : '-';
+  document.getElementById('penStartAge').textContent    = `만 ${pensionStartAge}세`;
+
+  // 재직기간별 예상 연금
+  const milestones=[10,15,20,25,30,33];
+  document.getElementById('penYearList').innerHTML = milestones.map(y=>{
+    const avgB=Math.round((currentBase+Math.round(currentBase*Math.pow(1+growth/100,Math.max(0,y-(age-(new Date().getFullYear()-startYear))))))/2);
+    const pen=Math.round(avgB*y*penRate);
+    const isActive = workYears >= y;
+    return `<div class="drow">
+      <span class="dl" style="${isActive?'':'opacity:.45'}">${y}년 재직</span>
+      <div style="text-align:right">
+        <div style="font-size:13px;font-weight:800;color:${isActive?'var(--accent)':'var(--muted)'}">${fmt(pen)}</div>
+        <div style="font-size:10px;color:var(--muted)">연 ${fmt(pen*12)}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // 국민연금과 비교 (동일 소득 기준 국민연금 추정: 소득대체율 40%)
+  const nationalPen = Math.round(avgBase * 0.40 * (workYears/40));
+  const rowF=(l,v,c='var(--text)')=>`<div class="drow"><span class="dl">${l}</span><span class="dv" style="color:${c}">${v}</span></div>`;
+  document.getElementById('penVsNational').innerHTML =
+    rowF('공무원연금 (예상 월액)', fmt(monthlyPension), 'var(--accent)') +
+    rowF('국민연금 (동일소득 추정)', fmt(nationalPen), 'var(--sub)') +
+    rowF('차이', fmt(monthlyPension - nationalPen), monthlyPension>=nationalPen?'var(--green)':'var(--red)') +
+    `<div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.8">
+      ※ 국민연금: 소득대체율 40%·가입기간 ${workYears}년 기준 추정치<br>
+      ※ 기여율: 공무원연금 9% vs 국민연금 4.5%(근로자 부담)
+    </div>`;
+}
+
+// ════════════════ 직렬/직급/호봉 빌드 ════════════════
+function buildSeries(){
+  document.getElementById('seriesGrid').innerHTML=SERIES.map(s=>`
+    <button class="sbtn${st.s===s.k?' on':''}" onclick="changeSeries('${s.k}')">
+      ${s.e}<br>${s.l}<br><span style="font-size:10px;font-weight:400;opacity:.7">${s.sl}</span>
+    </button>`).join('');
+}
+function changeSeries(k){st.s=k;st.tab='월급';st.g=GRADES[k][0].v;st.step=1;buildSeries();buildGrade();buildStep();buildAllow();document.getElementById('tabsEl').dataset.built='';calculate();}
+function buildGrade(){const el=document.getElementById('gradeSelect');el.innerHTML=GRADES[st.s].map(g=>`<option value="${g.v}">${g.l}</option>`).join('');el.value=st.g;}
+function onGradeChange(){const v=document.getElementById('gradeSelect').value;st.g=isNaN(Number(v))?v:Number(v);st.step=1;buildStep();calculate();}
+function buildStep(){const isSol=st.s==='milS';document.getElementById('stepSection').style.display=isSol?'none':'block';if(!isSol){const mx=MAX_STEP[st.s]?.[st.g]||32;const r=document.getElementById('stepRange');r.max=mx;r.value=Math.min(st.step,mx);st.step=Number(r.value);document.getElementById('maxStepLbl').textContent=mx+'호봉';document.getElementById('stepLbl').textContent=st.step+'호봉';}}
+function onStepChange(){st.step=Number(document.getElementById('stepRange').value);document.getElementById('stepLbl').textContent=st.step+'호봉';calculate();}
+
+// ════════════════ 수당 UI ════════════════
+function buildAllow(){
+  const isSol=st.s==='milS';
+  document.getElementById('allowCard').style.display=isSol?'none':'block';
+  if(isSol)return;
+  const cfg=SERIES.find(x=>x.k===st.s);
+  const a=st.a;
+  const rows=[
+    {type:'section',t:'📌 기본 수당'},
+    {type:'tg',k:'meal',l:'정액급식비',s:'140,000원 고정 (월)',alw:true},
+    {type:'tg',k:'overtime',l:'시간외근무수당',s:'정액분 105,790원 + 초과분'},
+    {type:'slider',show:'overtime',k:'ot_h',l:'월 초과근무시간',min:0,max:57},
+    {type:'tg',k:'night',l:'야간근무수당',s:'기본급/209×1.5×시간×0.5'},
+    {type:'num',show:'night',k:'night_h',l:'야간 시간수',unit:'시간',w:80},
+    {type:'section',t:'📌 위험·특수 수당'},
+    ...(cfg.danger?[{type:'tg',k:'danger',l:'위험근무수당',s:'월 80,000원'},{type:'num',show:'danger',k:'danger_amt',l:'위험근무수당 금액',unit:'원'}]:[]),
+    ...(cfg.tch?[{type:'tg',k:'tch_duty',l:'교직수당',s:'월 250,000원'},{type:'tg',k:'tch_research',l:'교원연구비',s:'월 50,000원'},{type:'tg',k:'tch_class',l:'담임수당',s:'월 130,000원'},{type:'tg',k:'tch_head',l:'중요직무급 (원감·교감)',s:'월 100,000원'}]:[]),
+    {type:'section',t:'💼 특수업무수당'},
+    {type:'spwork'},
+    {type:'section',t:'📍 특수근무지수당'},
+    {type:'locwork'},
+    {type:'section',t:'📌 가족수당'},
+    {type:'tg',k:'family_sp',l:'배우자 가족수당',s:'월 40,000원'},
+    {type:'tg',k:'child1',l:'자녀수당 - 첫째',s:'월 50,000원'},
+    {type:'tg',k:'child2',l:'자녀수당 - 둘째',s:'월 80,000원'},
+    {type:'tg',k:'child3',l:'자녀수당 - 셋째 이상',s:'월 120,000원/명'},
+    {type:'num',show:'child3',k:'child3n',l:'셋째 이상 자녀수',unit:'명',min:1,max:10,w:70},
+    {type:'section',t:'📌 기타 수당 및 복지'},
+    {type:'tg',k:'transport',l:'교통보조비',s:'기관별 상이'},
+    {type:'num',show:'transport',k:'transport_amt',l:'교통보조비',unit:'원'},
+    {type:'tg',k:'welfare',l:'복지포인트 (연간)',s:'기관별 상이'},
+    {type:'num',show:'welfare',k:'welfare_amt',l:'복지포인트 금액',unit:'원'},
+  ];
+  let html='';
+  for(const row of rows){
+    if(row.type==='section'){html+=`<div class="allow-section-title">${row.t}</div>`;continue;}
+    const on=a[row.k];const show=row.show?a[row.show]:true;
+    if(row.type==='tg'){const clickable=!row.alw;html+=`<div class="toggle-row" ${clickable?`onclick="toggleA('${row.k}')" style="cursor:pointer"`:'style="opacity:.7;cursor:default"'}><div class="sw" style="background:${on?'var(--accent)':'#cbd5e1'};pointer-events:none;flex-shrink:0"><div class="knob" style="left:${on?'20px':'2px'}"></div></div><div class="allow-text" style="pointer-events:none"><div class="allow-name">${row.l}</div>${row.s?`<div class="allow-sub">${row.s}</div>`:''}</div></div>`;}
+    else if(row.type==='slider'&&show){html+=`<div class="extra-inp"><span class="unit">${row.l}</span><input type="range" min="${row.min}" max="${row.max}" value="${a[row.k]}" oninput="setA('${row.k}',Number(this.value));calculate()" style="flex:1;accent-color:var(--accent)"><span class="unit">${a[row.k]}h</span></div>`;}
+    else if(row.type==='num'&&show){html+=`<div class="extra-inp"><span class="unit" style="flex-shrink:0;min-width:60px">${row.l}</span><input type="number" class="inp-sm inp-sm-w" min="${row.min||0}" max="${row.max||9999999}" value="${a[row.k]}" oninput="setA('${row.k}',Number(this.value));calculate()"><span class="unit">${row.unit}</span></div>`;}
+    else if(row.type==='spwork'){html+=buildSpWorkUI(a);}
+    else if(row.type==='locwork'){html+=buildLocUI(a);}
+  }
+  document.getElementById('allowList').innerHTML=html;
+}
+function buildSpWorkUI(a){
+  let h=`<div style="padding:8px 10px;border-radius:9px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.18);margin-bottom:8px"><div style="font-size:10px;color:var(--sub);line-height:1.7">ℹ️ 특수업무수당은 원칙 1종만 지급 (연구·민원수당은 기술정보수당과 중복 가능)</div></div>`;
+  Object.entries(SP_WORK).forEach(([key,cat])=>{
+    const on=a[key];const selKey=a[key+'_key']||'';const selItem=cat.items.find(i=>i.k===selKey);const amt=selItem?selItem.amt:0;
+    h+=`<div style="border:1.5px solid ${on?'rgba(59,130,246,0.3)':'var(--border)'};border-radius:12px;padding:10px;margin-bottom:7px;background:${on?'rgba(59,130,246,0.05)':'#fff'}">`;
+    h+=`<div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="toggleSp('${key}')"><div class="sw" style="background:${on?'var(--accent)':'#cbd5e1'}"><div class="knob" style="left:${on?'20px':'2px'}"></div></div><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--text)">${cat.name}</div><div style="font-size:10px;color:var(--muted);margin-top:1px">${cat.note}</div></div>${on&&amt?`<span style="font-size:13px;font-weight:800;color:var(--accent)">${fmtN(amt)}원</span>`:''}</div>`;
+    if(on){h+=`<div style="margin-top:8px"><div style="display:flex;flex-direction:column;gap:4px">`;cat.items.forEach(item=>{const sel=selKey===item.k;h+=`<div onclick="selectSp('${key}','${item.k}')" style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:9px;cursor:pointer;background:${sel?'rgba(59,130,246,0.1)':'#f8faff'};border:1.5px solid ${sel?'rgba(59,130,246,0.35)':'var(--border)'}"><div><div style="font-size:12px;font-weight:${sel?700:500};color:${sel?'var(--accent)':'var(--sub)'}">${item.l}</div></div><div style="font-size:13px;font-weight:800;color:${sel?'var(--accent)':'var(--muted)'}">${fmtN(item.amt)}원</div></div>`;});h+=`</div></div>`;}
+    h+=`</div>`;
+  });
+  return h;
+}
+function buildLocUI(a){
+  const on=a.loc_on;const selGrade=a.loc_grade||'';const selItem=LOC_GRADES.find(g=>g.k===selGrade);const amt=selItem?selItem.amt:0;
+  let h=`<div style="border:1.5px solid ${on?'rgba(16,185,129,0.3)':'var(--border)'};border-radius:12px;padding:10px;background:${on?'rgba(16,185,129,0.05)':'#fff'}">`;
+  h+=`<div style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:${on?'10px':'0'}" onclick="toggleLoc()"><div class="sw" style="background:${on?'var(--green)':'#cbd5e1'}"><div class="knob" style="left:${on?'20px':'2px'}"></div></div><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--text)">특수근무지수당 / 도서벽지수당</div><div style="font-size:10px;color:var(--muted);margin-top:1px">오지·도서·벽지·접적지 근무자</div></div>${on&&amt?`<span style="font-size:13px;font-weight:800;color:var(--green)">${fmtN(amt)}원</span>`:''}</div>`;
+  if(on){h+=`<div style="display:flex;flex-direction:column;gap:4px">`;LOC_GRADES.forEach(g=>{const sel=selGrade===g.k;h+=`<div onclick="selectLoc('${g.k}')" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:9px;cursor:pointer;background:${sel?'rgba(16,185,129,0.1)':'#f8faff'};border:1.5px solid ${sel?'rgba(16,185,129,0.4)':'var(--border)'}"><div style="font-size:12px;font-weight:${sel?700:500};color:${sel?'var(--green)':'var(--sub)'}">${g.l}</div><div style="font-size:14px;font-weight:800;color:${sel?'var(--green)':'var(--muted)'}">${fmtN(g.amt)}원</div></div>`;});h+=`</div>`;}
+  h+=`</div>`;return h;
+}
+function toggleA(k){if(k==='meal')return;st.a[k]=!st.a[k];buildAllow();calculate();}
+function setA(k,v){st.a[k]=v;}
+function toggleSp(key){st.a[key]=!st.a[key];if(!st.a[key])st.a[key+'_key']='';buildAllow();calculate();}
+function selectSp(key,itemKey){st.a[key+'_key']=itemKey;buildAllow();calculate();}
+function toggleLoc(){st.a.loc_on=!st.a.loc_on;if(!st.a.loc_on)st.a.loc_grade='';buildAllow();calculate();}
+function selectLoc(gradeKey){st.a.loc_grade=gradeKey;buildAllow();calculate();}
+
+// ════════════════ 메인 계산 ════════════════
+function calculate(){
+  st.years=parseInt(document.getElementById('yearsInput').value)||0;
+  const{s,g,step,years,a}=st;
+  const isSol=s==='milS';
+  const base=getBase(s,g,step);
+  document.getElementById('baseValLbl').textContent=fmt(base);
+  document.getElementById('soldierBox').style.display=isSol?'block':'none';
+
+  if(isSol){
+    document.getElementById('resultLbl').textContent='월 지급액 (세전)';
+    document.getElementById('resultMain').textContent=fmt(base);
+    document.getElementById('resultSub').textContent='병사는 세금·4대보험 공제 없음';
+    document.getElementById('soldierTotal').textContent=fmt(base+550000)+' (장병적금 55만원 포함)';
+    document.getElementById('tabsEl').innerHTML='';
+    document.getElementById('detailSection').innerHTML='';
+    lastResult={netM:base,monthlyFixed:base,annualGross:base*12,netA:base*12,base};
+    addHistory();updateShareCard();return;
+  }
+
+  const r=calcNet(s,g,step,years,a);
+  lastResult=r;
+  buildTabs(['월급','연봉','수당내역','공제내역']);
+  if(st.tab==='월급'||st.tab==='수당내역'||st.tab==='공제내역'){
+    document.getElementById('resultLbl').textContent='월 실수령액';
+    document.getElementById('resultMain').textContent=fmt(r.netM);
+    document.getElementById('resultSub').textContent=`세전 ${fmt(r.monthlyFixed)} → 공제 -${fmt(r.deduction)}`;
+  }else{
+    document.getElementById('resultLbl').textContent='연 실수령액 (추정)';
+    document.getElementById('resultMain').textContent=fmt(r.netA);
+    document.getElementById('resultSub').textContent=`세전 연봉 ${fmt(r.annualGross)}`;
+  }
+  const C={tx:'var(--text)',sub:'var(--sub)',g:'var(--green)',r:'var(--red)',go:'var(--gold)'};
+  const row=(l,v,c=C.tx)=>`<div class="drow"><span class="dl">${l}</span><span class="dv" style="color:${c}">${v}</span></div>`;
+  const sec=t=>`<div class="sec-title">📌 ${t}</div>`;
+  const sbox=(t,v,c,bg,br)=>`<div class="summary-box" style="background:${bg};border:1px solid ${br}"><div style="font-size:11px;color:var(--muted)">${t}</div><div class="sv" style="color:${c}">${v}</div></div>`;
+  let html='';
+  if(st.tab==='월급'){
+    html+=sec('월 급여 구성');
+    html+=row('기본급',fmt(r.base));html+=row('직급보조비',fmt(r.pos));
+    if(r.meal)html+=row('정액급식비',fmt(r.meal));
+    html+=row(`정근수당가산금 (${years}년차)`,fmt(r.geunAdd));
+    if(r.family)html+=row('가족수당',fmt(r.family));
+    if(r.over)html+=row('시간외수당',fmt(r.over));
+    if(r.nightAmt)html+=row('야간수당',fmt(r.nightAmt));
+    if(r.dangerAmt)html+=row('위험근무수당',fmt(r.dangerAmt));
+    html+=row('★ 세전 월 합계',fmt(r.monthlyFixed),C.g);
+    html+=`<div style="height:8px"></div>`;
+    html+=row('총 공제액',`-${fmt(r.deduction)}`,C.r);
+    html+=sbox('월 실수령액',fmt(r.netM),C.g,'rgba(16,185,129,0.08)','rgba(16,185,129,0.2)');
+  }else if(st.tab==='연봉'){
+    html+=sec('연간 수입 구성');
+    html+=row('월 고정급여 × 12',fmt(r.monthlyFixed*12));
+    html+=row(`정근수당 (${Math.round(getGeunRate(years)*100)}%, 연2회)`,fmt(r.geunAnnual),C.go);
+    html+=row('명절휴가비 (설·추석)',fmt(r.myeongjel),C.go);
+    html+=row('성과상여금 (평균 70%)',fmt(r.perf),C.go);
+    if(r.welfare)html+=row('복지포인트',fmt(r.welfare),C.go);
+    html+=row('★ 세전 연봉',fmt(r.annualGross),C.g);
+    html+=sbox('연 실수령액',fmt(r.netA),'var(--accent)','rgba(59,130,246,0.07)','rgba(59,130,246,0.18)');
+  }else if(st.tab==='수당내역'){
+    html+=sec('매월 지급 수당');
+    html+=row('직급보조비',fmt(r.pos));html+=row('정액급식비',r.meal?fmt(r.meal):'미적용');
+    html+=row(`정근수당가산금`,fmt(r.geunAdd));html+=row('가족수당',r.family?fmt(r.family):'미적용');
+    html+=row('시간외수당',r.over?fmt(r.over):'미적용');html+=row('야간수당',r.nightAmt?fmt(r.nightAmt):'미적용');
+    html+=row('위험근무수당',r.dangerAmt?fmt(r.dangerAmt):'미적용');
+    html+=sec('정기 수당 (연간)');
+    html+=row('정근수당',fmt(r.geunAnnual),C.go);html+=row('명절휴가비',fmt(r.myeongjel),C.go);
+    html+=row('성과상여금',fmt(r.perf),C.go);
+    if(r.welfare)html+=row('복지포인트',fmt(r.welfare),C.go);
+    html+=sbox('연간 수당 합계',fmt(r.geunAnnual+r.myeongjel+r.perf+r.welfare),C.go,'rgba(245,158,11,0.07)','rgba(245,158,11,0.2)');
+  }else if(st.tab==='공제내역'){
+    html+=sec('월 공제 내역');
+    html+=row('공무원연금 (9%)',`-${fmt(r.pension)}`,C.r);html+=row('건강보험 (3.545%)',`-${fmt(r.health)}`,C.r);
+    html+=row('장기요양보험',`-${fmt(r.ltc)}`,C.r);html+=row('고용보험 (0.9%)',`-${fmt(r.emp)}`,C.r);
+    html+=row('소득세+지방세',`-${fmt(r.taxTotal)}`,C.r);html+=row('★ 총 공제',`-${fmt(r.deduction)}`,C.r);
+    html+=sbox('월 실수령액',fmt(r.netM),C.g,'rgba(16,185,129,0.08)','rgba(16,185,129,0.2)');
+  }
+  document.getElementById('detailSection').innerHTML=html;
+  addHistory();updateShareCard();
+}
+function buildTabs(tabs){
+  const el=document.getElementById('tabsEl');
+  if(el.dataset.built==='1'){el.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.textContent===st.tab));return;}
+  el.dataset.built='1';
+  el.innerHTML=tabs.map(t=>`<button class="tab${t===st.tab?' on':''}" onclick="setTab('${t}')">${t}</button>`).join('');
+}
+function setTab(t){st.tab=t;document.getElementById('tabsEl').dataset.built='';calculate();}
+
+// ════════════════ 저장/불러오기 ════════════════
+function saveProfile(){
+  const profile={s:st.s,g:st.g,step:st.step,years:st.years,a:JSON.parse(JSON.stringify(st.a)),savedAt:new Date().toLocaleDateString('ko-KR')};
+  localStorage.setItem('civProfile',JSON.stringify(profile));
+  document.getElementById('loadBtn').style.display='inline-flex';
+  document.getElementById('savebarText').textContent=`✅ ${profile.savedAt} 저장됨`;
+  showToast('내 정보가 저장되었어요 💾');
+  renderMe();
+}
+function loadProfile(){
+  const raw=localStorage.getItem('civProfile');
+  if(!raw)return;
+  const p=JSON.parse(raw);
+  st.s=p.s;st.g=p.g;st.step=p.step||1;st.years=p.years||0;st.a=p.a;
+  document.getElementById('yearsInput').value=st.years;
+  buildSeries();buildGrade();buildStep();buildAllow();
+  document.getElementById('tabsEl').dataset.built='';calculate();
+  showToast('저장된 정보를 불러왔어요 ✨');
+}
+function checkSavedProfile(){
+  if(localStorage.getItem('civProfile')){
+    document.getElementById('loadBtn').style.display='inline-flex';
+    const p=JSON.parse(localStorage.getItem('civProfile'));
+    document.getElementById('savebarText').textContent=`💾 마지막 저장: ${p.savedAt}`;
+  }
+}
+
+// ════════════════ 히스토리 ════════════════
+function addHistory(){
+  if(!lastResult.netM)return;
+  const series=SERIES.find(x=>x.k===st.s);
+  const grade=GRADES[st.s]?.find(x=>String(x.v)===String(st.g));
+  const title=`${series?.l||''} ${grade?.l||''} ${st.s==='milS'?'':st.step+'호봉'}`;
+  const item={id:Date.now(),title,netM:lastResult.netM,netA:lastResult.netA,at:new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})};
+  let hist=JSON.parse(localStorage.getItem('civHistory')||'[]');
+  hist=hist.filter(h=>h.title!==title).slice(0,9);
+  hist.unshift(item);
+  localStorage.setItem('civHistory',JSON.stringify(hist));
+}
+function renderHistory(){
+  const hist=JSON.parse(localStorage.getItem('civHistory')||'[]');
+  const el=document.getElementById('historyList');
+  if(!hist.length){el.innerHTML=`<div style="font-size:12px;color:var(--muted);text-align:center;padding:20px">아직 계산 기록이 없어요</div>`;return;}
+  el.innerHTML=hist.map(h=>`
+    <div class="history-item" onclick="loadFromHistory('${h.id}')">
+      <div>
+        <div class="history-title">${h.title}</div>
+        <div class="history-sub">${h.at} · 연 ${fmt(h.netA)}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="history-val">${fmt(h.netM)}</div>
+        <div style="font-size:10px;color:var(--muted)">월 실수령액</div>
+      </div>
+    </div>`).join('');
+}
+
+// ════════════════ 내 정보 페이지 ════════════════
+function renderMe(){
+  renderProfile();renderHistory();updateShareCard();
+}
+function renderProfile(){
+  const raw=localStorage.getItem('civProfile');
+  const el=document.getElementById('profileContent');
+  if(!raw){
+    el.innerHTML=`<div style="font-size:12px;color:var(--muted);text-align:center;padding:16px">저장된 프로필이 없어요<br><span style="font-size:11px">계산기에서 '저장' 버튼을 눌러보세요</span></div>`;return;
+  }
+  const p=JSON.parse(raw);
+  const series=SERIES.find(x=>x.k===p.s);
+  const grade=GRADES[p.s]?.find(x=>String(x.v)===String(p.g));
+  const r=calcNet(p.s,p.g,p.step||1,p.years||0,p.a);
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+      <div>
+        <div style="font-size:16px;font-weight:800;color:var(--text)">${series?.e||''} ${series?.l||''}</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:3px">${grade?.l||''} · ${p.step||1}호봉 · ${p.years||0}년차</div>
+      </div>
+      <button class="btn-s btn-danger" onclick="deleteProfile()">삭제</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div style="background:rgba(59,130,246,0.07);border:1.5px solid rgba(59,130,246,0.18);border-radius:12px;padding:12px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">월 실수령액</div>
+        <div style="font-size:18px;font-weight:800;color:var(--accent)">${fmt(r.netM)}</div>
+      </div>
+      <div style="background:rgba(16,185,129,0.07);border:1.5px solid rgba(16,185,129,0.18);border-radius:12px;padding:12px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">연 실수령액</div>
+        <div style="font-size:18px;font-weight:800;color:var(--green)">${fmt(r.netA)}</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:8px;text-align:right">마지막 저장: ${p.savedAt}</div>`;
+}
+function deleteProfile(){
+  localStorage.removeItem('civProfile');
+  document.getElementById('savebarText').textContent='💾 현재 설정을 저장하면 다음에 바로 불러올 수 있어요';
+  document.getElementById('loadBtn').style.display='none';
+  renderMe();showToast('프로필을 삭제했어요');
+}
+
+// ════════════════ 공유 카드 ════════════════
+function updateShareCard(){
+  if(!lastResult.netM)return;
+  const series=SERIES.find(x=>x.k===st.s);
+  const grade=GRADES[st.s]?.find(x=>String(x.v)===String(st.g));
+  const title=`${series?.l||''} ${grade?.l||''} ${st.s==='milS'?'':st.step+'호봉'}`;
+  document.getElementById('shareJobTitle').textContent=title;
+  document.getElementById('shareMainVal').textContent=fmt(lastResult.netM);
+  document.getElementById('shareSubVal').textContent=`세전 ${fmt(lastResult.monthlyFixed||0)}`;
+  const rows=[
+    ['연 실수령액 (추정)',fmt(lastResult.netA||0)],
+    ['공무원연금',`-${fmt(lastResult.pension||0)}`],
+    ['건강보험',`-${fmt(lastResult.health||0)}`],
+  ];
+  document.getElementById('shareRows').innerHTML=rows.map(([l,v])=>`<div class="share-row"><span style="color:var(--sub)">${l}</span><span style="font-weight:700">${v}</span></div>`).join('');
+}
+function copyResult(){
+  const series=SERIES.find(x=>x.k===st.s);
+  const grade=GRADES[st.s]?.find(x=>String(x.v)===String(st.g));
+  const title=`${series?.l||''} ${grade?.l||''} ${st.s==='milS'?'':st.step+'호봉 '}${st.years}년차`;
+  const text=`[2026 공무원 실수령액]\n${title}\n\n💰 월 실수령액: ${fmt(lastResult.netM)}\n📅 연 실수령액: ${fmt(lastResult.netA||0)}\n💼 세전 월급: ${fmt(lastResult.monthlyFixed||0)}\n\n— 공무원 연봉 계산기 2026 완전판`;
+  navigator.clipboard.writeText(text).then(()=>showToast('클립보드에 복사됐어요 📋')).catch(()=>showToast('복사 실패, 다시 시도해주세요'));
+}
+function shareResult(){
+  const series=SERIES.find(x=>x.k===st.s);
+  const grade=GRADES[st.s]?.find(x=>String(x.v)===String(st.g));
+  const title=`${series?.l||''} ${grade?.l||''} 월 실수령액: ${fmt(lastResult.netM)}`;
+  if(navigator.share){navigator.share({title:'2026 공무원 실수령액',text:title}).catch(()=>{});}
+  else{copyResult();}
+}
+
+// ════════════════ 비교 계산기 (공무원 vs 공무원) ════════════════
+// ════════════════ 비교 계산기 (공무원 vs 공무원) ════════════════
+let cmpSlotA = null;
+let cmpSlotB = null;
+
+function saveToCompare(slot){
+  const r = calcNet(st.s, st.g, st.step, st.years, st.a);
+  const series = SERIES.find(x=>x.k===st.s);
+  const grade  = GRADES[st.s]?.find(x=>String(x.v)===String(st.g));
+  const label  = `${series?.l||''} ${grade?.l||''} ${st.s==='milS'?'':st.step+'호봉 '}${st.years}년차`;
+  if(slot==='A'){ cmpSlotA={label,r}; showToast('비교 A에 저장했어요 ✅'); }
+  else          { cmpSlotB={label,r}; showToast('비교 B에 저장했어요 ✅'); }
+  if(cmpMode==='gov') renderGovCompare();
+}
+
+function renderGovCompare(){
+  if(cmpSlotA){
+    const r=cmpSlotA.r;
+    document.getElementById('cmpGovInfoA').textContent    = cmpSlotA.label;
+    document.getElementById('cmpGrossA').textContent      = fmt(r.monthlyFixed);
+    document.getElementById('cmpNetA').textContent        = fmt(r.netM);
+    document.getElementById('cmpNetAnnualA').textContent  = `연 실수령 ${fmt(r.netA)}`;
+  }
+  if(cmpSlotB){
+    const r=cmpSlotB.r;
+    document.getElementById('cmpGovInfoB').textContent    = cmpSlotB.label;
+    document.getElementById('cmpGrossB').textContent      = fmt(r.monthlyFixed);
+    document.getElementById('cmpNetB').textContent        = fmt(r.netM);
+    document.getElementById('cmpNetAnnualB').textContent  = `연 실수령 ${fmt(r.netA)}`;
+  }
+  if(!cmpSlotA||!cmpSlotB){ document.getElementById('cmpDetailList').innerHTML=''; return; }
+
+  const rA=cmpSlotA.r, rB=cmpSlotB.r;
+  const diff=rA.netM-rB.netM;
+  const diffEl=document.getElementById('cmpDiff');
+  if(diff===0){ diffEl.textContent='두 직급의 실수령액이 동일해요'; diffEl.style.color='var(--green)'; }
+  else {
+    const who=diff>0?'A':'B';
+    diffEl.innerHTML=`<span style="color:${diff>0?'var(--accent)':'var(--gold)'}">${who}</span>가 월 <strong>${fmt(Math.abs(diff))}</strong> 더 많아요`;
+    diffEl.style.color='var(--text)';
+  }
+  const total=rA.netM+rB.netM;
+  document.getElementById('cmpBarA').style.width=total?`${(rA.netM/total)*100}%`:'50%';
+
+  const rowF=(l,a,b)=>`<div class="drow">
+    <span class="dl" style="flex:1">${l}</span>
+    <span style="font-size:12px;font-weight:700;color:var(--accent);min-width:86px;text-align:right">${a}</span>
+    <span style="font-size:12px;font-weight:700;color:var(--gold);min-width:86px;text-align:right">${b}</span>
+  </div>`;
+
+  document.getElementById('cmpDetailList').innerHTML =
+    `<div style="display:flex;justify-content:flex-end;gap:4px;margin-bottom:4px">
+       <span style="font-size:10px;font-weight:700;color:var(--accent);min-width:86px;text-align:right">A</span>
+       <span style="font-size:10px;font-weight:700;color:var(--gold);min-width:86px;text-align:right">B</span>
+     </div>` +
+    rowF('기본급', fmt(rA.base), fmt(rB.base)) +
+    rowF('직급보조비', fmt(rA.pos), fmt(rB.pos)) +
+    rowF('수당 합계', fmt(rA.monthlyFixed-rA.base-rA.pos), fmt(rB.monthlyFixed-rB.base-rB.pos)) +
+    rowF('월 세전 합계', fmt(rA.monthlyFixed), fmt(rB.monthlyFixed)) +
+    rowF('공무원연금', `-${fmt(rA.pension)}`, `-${fmt(rB.pension)}`) +
+    rowF('건강보험', `-${fmt(rA.health)}`, `-${fmt(rB.health)}`) +
+    rowF('소득세+지방세', `-${fmt(rA.taxTotal)}`, `-${fmt(rB.taxTotal)}`) +
+    rowF('월 실수령액', fmt(rA.netM), fmt(rB.netM)) +
+    rowF('세전 연봉', fmt(rA.annualGross), fmt(rB.annualGross)) +
+    rowF('연 실수령액', fmt(rA.netA), fmt(rB.netA));
+}
+
+function initCompare(){ setCmpMode(cmpMode); }
+function buildCmpGrade(ab){} // 레거시 호환
+
+function calcCompare(){
+  if(cmpMode==='sal'){ calcSalCompare(); return; }
+  renderGovCompare();
+}
+
+// ════════════════ 토스트 ════════════════
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ════════════════ 초기화 ════════════════
+buildSeries();buildGrade();buildStep();buildAllow();calculate();checkSavedProfile();
+</script>
+
+<!--
+=======================================================
+  📢 카카오 애드핏 광고 적용 가이드
+=======================================================
+  1. https://adfit.kakao.com 에서 회원가입 후 매체 등록
+  2. 사이트 URL 입력 → 심사 신청 (보통 3~7일 소요)
+  3. 심사 통과 후 각 광고 단위별 고유 코드(DAN-XXXX) 발급
+  4. 아래 슬롯 ID를 실제 발급받은 코드로 교체:
+     - 슬롯 1 (결과 하단 320x100): DAN-XXXXXXXXXXXXXX
+     - 슬롯 2 (계산기 하단 320x50): DAN-YYYYYYYYYYYYYY
+     - 슬롯 3 (비교 페이지 320x100): DAN-ZZZZZZZZZZZZZZ
+  5. 각 ins 태그의 style="display:none;" 을 style="display:block;" 으로 변경
+
+  💡 배포 추천: GitHub Pages (무료) → https://pages.github.com
+  💡 도메인 추천: gaemu.kr / salary2026.kr 등 (연 1만원대)
+=======================================================
+-->
+</body>
+</html>
